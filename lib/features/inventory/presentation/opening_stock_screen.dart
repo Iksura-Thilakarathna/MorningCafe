@@ -121,7 +121,7 @@ class _OpeningStockScreenState extends State<OpeningStockScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
-                    color: const Color(0xFFEFF6FF),
+                    color: AppColors.infoBackground,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(

@@ -125,7 +125,7 @@ class _StockReconciliationScreenState extends State<StockReconciliationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
-                    color: const Color(0xFFF8FAFC),
+                    color: AppColors.surfaceWarm,
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: Row(

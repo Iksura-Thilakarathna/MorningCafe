@@ -336,7 +336,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
           ),
           const SizedBox(height: 14),
           Card(
-            color: const Color(0xFFEFF6FF),
+            color: AppColors.infoBackground,
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(

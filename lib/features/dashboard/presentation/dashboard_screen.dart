@@ -97,13 +97,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            const Text('Morning Cafe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(
-              '${Formatters.displayDate(_startDate)} - ${Formatters.displayDate(_endDate)}',
-              style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Morning Cafe', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.darkText)),
+                Text(
+                  '${Formatters.displayDate(_startDate)} - ${Formatters.displayDate(_endDate)}',
+                  style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
+                ),
+              ],
             ),
           ],
         ),
@@ -154,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: ChoiceChip(
               label: Text(f, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
               selected: isSelected,
-              selectedColor: AppColors.primary.withValues(alpha: 0.15),
+              selectedColor: AppColors.accentGold.withValues(alpha: 0.22),
               onSelected: (val) {
                 if (val) _applyFilter(f);
               },
@@ -359,7 +373,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             const Text('Daily Revenue & Net Profit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
             const SizedBox(height: 4),
-            const Text('Blue: Revenue, Green: Net Profit', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+            const Text('Gold: Sales Revenue, Green: Net Profit', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
             const SizedBox(height: 16),
             SizedBox(
               height: 180,
@@ -397,7 +411,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         barRods: [
                           BarChartRodData(
                             toY: max(0.0, (daily[i]['sales_revenue'] as num).toDouble()),
-                            color: AppColors.primary,
+                            color: AppColors.accentGold,
                             width: 8,
                             borderRadius: BorderRadius.circular(4),
                           ),

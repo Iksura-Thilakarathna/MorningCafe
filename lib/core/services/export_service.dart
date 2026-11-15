@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:csv/csv.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -79,6 +80,15 @@ class ExportService {
 
     final pdf = pw.Document();
 
+    pw.MemoryImage? logoImage;
+    try {
+      final logoBytes = (await rootBundle.load('assets/images/logo.png')).buffer.asUint8List();
+      logoImage = pw.MemoryImage(logoBytes);
+    } catch (_) {}
+
+    const espressoColor = PdfColor.fromInt(0xFF381A0B);
+    const goldAccent = PdfColor.fromInt(0xFFE5A328);
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -90,11 +100,19 @@ class ExportService {
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  pw.Row(
                     children: [
-                      pw.Text('Morning Cafe', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-                      pw.Text('Piliyandala, Sri Lanka • Business Management Statement', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                      if (logoImage != null) ...[
+                        pw.Image(logoImage, width: 44, height: 44),
+                        pw.SizedBox(width: 12),
+                      ],
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text('Morning Cafe', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: espressoColor)),
+                          pw.Text('Piliyandala, Sri Lanka • Business Management Statement', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+                        ],
+                      ),
                     ],
                   ),
                   pw.Column(
@@ -107,8 +125,8 @@ class ExportService {
                 ],
               ),
             ),
-            pw.SizedBox(height: 16),
-            pw.Text('1. Executive Financial Summary', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Container(height: 2, color: goldAccent, margin: const pw.EdgeInsets.only(top: 8, bottom: 12)),
+            pw.Text('1. Executive Financial Summary', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: espressoColor)),
             pw.SizedBox(height: 8),
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
@@ -129,12 +147,12 @@ class ExportService {
               ],
             ),
             pw.SizedBox(height: 20),
-            pw.Text('2. Daily Operations Breakdown', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Text('2. Daily Operations Breakdown', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: espressoColor)),
             pw.SizedBox(height: 8),
             pw.TableHelper.fromTextArray(
               border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
               headerStyle: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-              headerDecoration: const pw.BoxDecoration(color: PdfColors.blue700),
+              headerDecoration: const pw.BoxDecoration(color: espressoColor),
               cellStyle: const pw.TextStyle(fontSize: 8),
               headers: ['Date', 'Day', 'Revenue', 'COGS', 'Gross', 'Wastage', 'Expenses', 'Purchases', 'Net Profit'],
               data: [
@@ -174,7 +192,7 @@ class ExportService {
 
   static pw.TableRow _buildPdfRow(String label, String value, {bool isBold = false, bool highlight = false}) {
     return pw.TableRow(
-      decoration: highlight ? const pw.BoxDecoration(color: PdfColors.blue50) : null,
+      decoration: highlight ? const pw.BoxDecoration(color: PdfColor.fromInt(0xFFFAF2ED)) : null,
       children: [
         pw.Padding(
           padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -194,7 +212,7 @@ class ExportService {
             style: pw.TextStyle(
               fontSize: isBold ? 10 : 9,
               fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
-              color: highlight ? PdfColors.blue900 : PdfColors.black,
+              color: highlight ? const PdfColor.fromInt(0xFF381A0B) : PdfColors.black,
             ),
           ),
         ),

@@ -316,7 +316,7 @@ class _SalesScreenState extends State<SalesScreen> {
     if (_expectedUsageList.isEmpty) return const SizedBox.shrink();
 
     return Card(
-      color: const Color(0xFFF8FAFC),
+      color: AppColors.surfaceWarm,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -100,19 +100,48 @@ class _MorningCafeAppState extends State<MorningCafeApp> {
       themeMode: _themeMode,
       home: (_checkingAuth || !_isAuthenticated)
           ? Scaffold(
+              backgroundColor: AppColors.backgroundLight,
               body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.lock_outline, size: 48, color: AppColors.primary),
-                    const SizedBox(height: 16),
-                    const Text('Morning Cafe Locked', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 14),
-                    ElevatedButton(
-                      onPressed: _authenticateBiometric,
-                      child: const Text('Unlock with Biometrics'),
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 140,
+                          height: 140,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Morning Cafe',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          color: AppColors.primary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Piliyandala, Sri Lanka',
+                        style: TextStyle(fontSize: 13, color: AppColors.secondaryText),
+                      ),
+                      const SizedBox(height: 28),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.fingerprint, size: 22),
+                        label: const Text('Unlock Business Records'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        ),
+                        onPressed: _authenticateBiometric,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             )

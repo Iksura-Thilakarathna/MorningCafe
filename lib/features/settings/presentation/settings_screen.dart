@@ -95,18 +95,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('Business Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  SizedBox(height: 10),
-                  Text('Name: ${AppConstants.appName}', style: TextStyle(fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text('Location: ${AppConstants.businessLocation}', style: TextStyle(fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text('Default Currency: ${AppConstants.defaultCurrency}', style: TextStyle(fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text('Timezone: ${AppConstants.defaultTimezone}', style: TextStyle(fontSize: 13)),
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('Morning Cafe Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.primary)),
+                        SizedBox(height: 6),
+                        Text('Location: ${AppConstants.businessLocation}', style: TextStyle(fontSize: 12, color: AppColors.darkText)),
+                        SizedBox(height: 3),
+                        Text('Currency: ${AppConstants.defaultCurrency}', style: TextStyle(fontSize: 12, color: AppColors.darkText)),
+                        SizedBox(height: 3),
+                        Text('Timezone: ${AppConstants.defaultTimezone}', style: TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
