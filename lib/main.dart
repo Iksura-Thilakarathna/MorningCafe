@@ -6,12 +6,8 @@ import 'app/home_navigation_screen.dart';
 import 'core/database/database_helper.dart';
 import 'core/theme/app_theme.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize SQLite database
-  await DatabaseHelper.instance.database;
-
   runApp(const ProviderScope(child: MorningCafeApp()));
 }
 

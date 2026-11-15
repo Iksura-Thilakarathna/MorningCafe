@@ -21,6 +21,7 @@ class _SalesScreenState extends State<SalesScreen> {
   List<Map<String, dynamic>> _products = [];
   final Map<int, int> _quantities = {};
   final Map<int, double> _customActualUsage = {};
+  final Map<int, List<Map<String, dynamic>>> _productRecipeCache = {};
   List<Map<String, dynamic>> _expectedUsageList = [];
 
   bool _isLoading = true;
@@ -37,15 +38,26 @@ class _SalesScreenState extends State<SalesScreen> {
   Future<void> _loadProducts() async {
     setState(() => _isLoading = true);
     final prods = await _productService.getProducts(activeOnly: true);
+    final dateStr = Formatters.date(_selectedDate);
+
+    _productRecipeCache.clear();
+    for (final p in prods) {
+      final pid = p['id'] as int;
+      _quantities.putIfAbsent(pid, () => 0);
+      final usage = await _recipeService.calculateTheoreticalUsage(
+        productId: pid,
+        quantitySold: 1,
+        saleDate: dateStr,
+      );
+      _productRecipeCache[pid] = usage;
+    }
+
     if (mounted) {
       setState(() {
         _products = prods;
-        for (final p in prods) {
-          _quantities[p['id'] as int] = 0;
-        }
         _isLoading = false;
+        _recomputeExpectedUsageSync();
       });
-      _calculateTheoreticalUsage();
     }
   }
 
@@ -54,28 +66,22 @@ class _SalesScreenState extends State<SalesScreen> {
       final current = _quantities[productId] ?? 0;
       final updated = (current + delta).clamp(0, 9999);
       _quantities[productId] = updated;
+      _recomputeExpectedUsageSync();
     });
-    _calculateTheoreticalUsage();
   }
 
-  Future<void> _calculateTheoreticalUsage() async {
+  void _recomputeExpectedUsageSync() {
     final aggregated = <int, Map<String, dynamic>>{};
-    final dateStr = Formatters.date(_selectedDate);
-
     for (final entry in _quantities.entries) {
       final pid = entry.key;
       final qty = entry.value;
       if (qty <= 0) continue;
 
-      final usage = await _recipeService.calculateTheoreticalUsage(
-        productId: pid,
-        quantitySold: qty,
-        saleDate: dateStr,
-      );
-
-      for (final u in usage) {
+      final items = _productRecipeCache[pid] ?? [];
+      for (final u in items) {
         final iid = u['ingredient_id'] as int;
-        final totalQ = (u['total_quantity'] as num).toDouble();
+        final perUnit = (u['total_quantity'] as num).toDouble();
+        final totalQ = perUnit * qty;
         if (aggregated.containsKey(iid)) {
           aggregated[iid]!['quantity'] += totalQ;
         } else {
@@ -88,12 +94,7 @@ class _SalesScreenState extends State<SalesScreen> {
         }
       }
     }
-
-    if (mounted) {
-      setState(() {
-        _expectedUsageList = aggregated.values.toList();
-      });
-    }
+    _expectedUsageList = aggregated.values.toList();
   }
 
   double _computeTotalRevenue() {
@@ -241,7 +242,7 @@ class _SalesScreenState extends State<SalesScreen> {
             );
             if (picked != null) {
               setState(() => _selectedDate = picked);
-              _calculateTheoreticalUsage();
+              _loadProducts();
             }
           },
         ),

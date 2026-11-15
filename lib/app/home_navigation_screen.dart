@@ -22,28 +22,44 @@ class HomeNavigationScreen extends StatefulWidget {
 
 class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
   int _currentIndex = 0;
+  final Set<int> _loadedTabs = {0};
+
+  void _onTabSelected(int idx) {
+    setState(() {
+      _currentIndex = idx;
+      _loadedTabs.add(idx);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screens = [
-      DashboardScreen(onNavigateTab: (idx) => setState(() => _currentIndex = idx)),
-      const SalesScreen(),
-      const InventoryScreen(),
-      const FinanceScreen(),
-      MoreScreen(
-        currentThemeMode: widget.currentThemeMode,
-        onThemeModeChanged: widget.onThemeModeChanged,
-      ),
-    ];
-
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: screens,
+        children: [
+          _loadedTabs.contains(0)
+              ? DashboardScreen(onNavigateTab: _onTabSelected)
+              : const SizedBox.shrink(),
+          _loadedTabs.contains(1)
+              ? const SalesScreen()
+              : const SizedBox.shrink(),
+          _loadedTabs.contains(2)
+              ? const InventoryScreen()
+              : const SizedBox.shrink(),
+          _loadedTabs.contains(3)
+              ? const FinanceScreen()
+              : const SizedBox.shrink(),
+          _loadedTabs.contains(4)
+              ? MoreScreen(
+                  currentThemeMode: widget.currentThemeMode,
+                  onThemeModeChanged: widget.onThemeModeChanged,
+                )
+              : const SizedBox.shrink(),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
+        onDestinationSelected: _onTabSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
