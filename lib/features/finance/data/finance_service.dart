@@ -190,42 +190,51 @@ class FinanceService {
   Future<List<Map<String, dynamic>>> _calculateDailyBreakdown(String startDate, String endDate) async {
     final start = DateTime.parse(startDate);
     final end = DateTime.parse(endDate);
-    final days = <Map<String, dynamic>>[];
-
-    DateTime current = start;
     final db = await _dbHelper.database;
+
+    // Single aggregated batch queries for the entire period (fast, non-blocking)
+    final salesRes = await db.rawQuery('''
+      SELECT sale_date, COALESCE(SUM(total_revenue), 0.0) as rev, COALESCE(SUM(total_cogs), 0.0) as cogs 
+      FROM daily_sales WHERE sale_date >= ? AND sale_date <= ? GROUP BY sale_date
+    ''', [startDate, endDate]);
+    final salesMap = {for (final r in salesRes) r['sale_date'] as String: r};
+
+    final wasteRes = await db.rawQuery('''
+      SELECT wastage_date, COALESCE(SUM(total_cost), 0.0) as wcost 
+      FROM stock_wastage WHERE wastage_date >= ? AND wastage_date <= ? GROUP BY wastage_date
+    ''', [startDate, endDate]);
+    final wasteMap = {for (final r in wasteRes) r['wastage_date'] as String: (r['wcost'] as num).toDouble()};
+
+    final expRes = await db.rawQuery('''
+      SELECT expense_date, COALESCE(SUM(amount), 0.0) as exp 
+      FROM additional_expenses WHERE expense_date >= ? AND expense_date <= ? GROUP BY expense_date
+    ''', [startDate, endDate]);
+    final expMap = {for (final r in expRes) r['expense_date'] as String: (r['exp'] as num).toDouble()};
+
+    final incRes = await db.rawQuery('''
+      SELECT transaction_date, COALESCE(SUM(amount), 0.0) as inc 
+      FROM additional_income WHERE transaction_date >= ? AND transaction_date <= ? GROUP BY transaction_date
+    ''', [startDate, endDate]);
+    final incMap = {for (final r in incRes) r['transaction_date'] as String: (r['inc'] as num).toDouble()};
+
+    final purRes = await db.rawQuery('''
+      SELECT purchase_date, COALESCE(SUM(total_amount), 0.0) as pur 
+      FROM purchases WHERE purchase_date >= ? AND purchase_date <= ? AND status = 'confirmed' GROUP BY purchase_date
+    ''', [startDate, endDate]);
+    final purMap = {for (final r in purRes) r['purchase_date'] as String: (r['pur'] as num).toDouble()};
+
+    final days = <Map<String, dynamic>>[];
+    DateTime current = start;
 
     while (!current.isAfter(end)) {
       final curDateStr = current.toIso8601String().substring(0, 10);
-
-      final sRes = await db.rawQuery('''
-        SELECT 
-          COALESCE(SUM(total_revenue), 0.0) as rev,
-          COALESCE(SUM(total_cogs), 0.0) as cogs
-        FROM daily_sales WHERE sale_date = ?
-      ''', [curDateStr]);
-      final rev = (sRes.first['rev'] as num).toDouble();
-      final cogs = (sRes.first['cogs'] as num).toDouble();
-
-      final wRes = await db.rawQuery('''
-        SELECT COALESCE(SUM(total_cost), 0.0) as wcost FROM stock_wastage WHERE wastage_date = ?
-      ''', [curDateStr]);
-      final wcost = (wRes.first['wcost'] as num).toDouble();
-
-      final eRes = await db.rawQuery('''
-        SELECT COALESCE(SUM(amount), 0.0) as exp FROM additional_expenses WHERE expense_date = ?
-      ''', [curDateStr]);
-      final exp = (eRes.first['exp'] as num).toDouble();
-
-      final iRes = await db.rawQuery('''
-        SELECT COALESCE(SUM(amount), 0.0) as inc FROM additional_income WHERE transaction_date = ?
-      ''', [curDateStr]);
-      final inc = (iRes.first['inc'] as num).toDouble();
-
-      final pRes = await db.rawQuery('''
-        SELECT COALESCE(SUM(total_amount), 0.0) as pur FROM purchases WHERE purchase_date = ? AND status = 'confirmed'
-      ''', [curDateStr]);
-      final pur = (pRes.first['pur'] as num).toDouble();
+      final s = salesMap[curDateStr];
+      final rev = s != null ? (s['rev'] as num).toDouble() : 0.0;
+      final cogs = s != null ? (s['cogs'] as num).toDouble() : 0.0;
+      final wcost = wasteMap[curDateStr] ?? 0.0;
+      final exp = expMap[curDateStr] ?? 0.0;
+      final inc = incMap[curDateStr] ?? 0.0;
+      final pur = purMap[curDateStr] ?? 0.0;
 
       final gross = rev - cogs;
       final net = rev + inc - cogs - wcost - exp;
