@@ -33,6 +33,9 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedColor = isDark ? AppColors.highlightYellow : AppColors.primary;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -60,30 +63,30 @@ class _HomeNavigationScreenState extends State<HomeNavigationScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onTabSelected,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard, color: selectedColor),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.point_of_sale_outlined),
-            selectedIcon: Icon(Icons.point_of_sale, color: AppColors.primary),
+            icon: const Icon(Icons.point_of_sale_outlined),
+            selectedIcon: Icon(Icons.point_of_sale, color: selectedColor),
             label: 'Sales',
           ),
           NavigationDestination(
-            icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2, color: AppColors.primary),
+            icon: const Icon(Icons.inventory_2_outlined),
+            selectedIcon: Icon(Icons.inventory_2, color: selectedColor),
             label: 'Inventory',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet, color: AppColors.primary),
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: Icon(Icons.account_balance_wallet, color: selectedColor),
             label: 'Finance',
           ),
           NavigationDestination(
-            icon: Icon(Icons.more_horiz),
-            selectedIcon: Icon(Icons.more_horiz, color: AppColors.primary),
+            icon: const Icon(Icons.more_horiz),
+            selectedIcon: Icon(Icons.more_horiz, color: selectedColor),
             label: 'More',
           ),
         ],

@@ -99,23 +99,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/images/logo.png',
-                width: 36,
-                height: 36,
-                fit: BoxFit.contain,
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(2),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 34,
+                  height: 34,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Morning Cafe', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.darkText)),
+                Text(
+                  'Morning Cafe',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.textDark : AppColors.darkText,
+                  ),
+                ),
                 Text(
                   '${Formatters.displayDate(_startDate)} - ${Formatters.displayDate(_endDate)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                  ),
                 ),
               ],
             ),
@@ -123,7 +146,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary,
+            ),
             tooltip: 'Refresh',
             onPressed: _loadDashboardData,
           ),
@@ -157,6 +183,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildFilterBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final filters = ['Today', 'Yesterday', 'Last 7 Days', 'This Week', 'Previous Week'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -166,9 +193,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              label: Text(f, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+              label: Text(
+                f,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? (isDark ? const Color(0xFF160E0A) : AppColors.darkText)
+                      : (isDark ? AppColors.textDark : AppColors.secondaryText),
+                ),
+              ),
               selected: isSelected,
-              selectedColor: AppColors.accentGold.withValues(alpha: 0.22),
+              selectedColor: isDark ? AppColors.highlightYellow : AppColors.accentGold.withValues(alpha: 0.22),
+              backgroundColor: isDark ? AppColors.cardDark : AppColors.cardLight,
+              side: BorderSide(
+                color: isSelected
+                    ? (isDark ? AppColors.highlightYellow : AppColors.accentGold)
+                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+              ),
               onSelected: (val) {
                 if (val) _applyFilter(f);
               },
@@ -180,13 +222,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildQuickActionButtons() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.point_of_sale, size: 18),
+            icon: Icon(
+              Icons.point_of_sale,
+              size: 18,
+              color: isDark ? const Color(0xFF160E0A) : Colors.white,
+            ),
             label: const Text('Record Sales'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+              foregroundColor: isDark ? const Color(0xFF160E0A) : Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () async {
               await Navigator.push(context, MaterialPageRoute(builder: (_) => const SalesScreen()));
               _loadDashboardData();
@@ -196,13 +248,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(width: 8),
         Expanded(
           child: OutlinedButton.icon(
-            icon: const Icon(Icons.shopping_cart_outlined, size: 18),
+            icon: Icon(
+              Icons.shopping_cart_outlined,
+              size: 18,
+              color: isDark ? AppColors.highlightYellow : AppColors.primary,
+            ),
             label: const Text('New Purchase'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
+              foregroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+              side: BorderSide(
+                color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                width: 1.5,
+              ),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () async {
               await Navigator.push(context, MaterialPageRoute(builder: (_) => const PurchasesScreen()));
@@ -217,6 +276,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildSummaryCards() {
     if (_reportData == null) return const SizedBox.shrink();
     final d = _reportData!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final netProfit = (d['net_profit'] as num).toDouble();
     final salesRev = (d['sales_revenue'] as num).toDouble();
@@ -228,14 +288,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final netCashFlow = (d['net_cash_flow'] as num).toDouble();
     final profitMargin = (d['profit_margin'] as num).toDouble();
 
+    final profitColor = netProfit >= 0
+        ? (isDark ? AppColors.highlightGreen : AppColors.success)
+        : (isDark ? AppColors.highlightRed : AppColors.danger);
+
+    final heroCardBg = isDark
+        ? (netProfit >= 0 ? AppColors.darkSuccessBackground : AppColors.darkDangerBackground)
+        : (netProfit >= 0 ? AppColors.successBackground : AppColors.dangerBackground);
+
     return Column(
       children: [
         // Highlight Card: OPERATIONAL NET PROFIT (Prominent)
         Card(
-          color: netProfit >= 0 ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2),
+          color: heroCardBg,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: netProfit >= 0 ? AppColors.success : AppColors.danger, width: 1.5),
+            side: BorderSide(color: profitColor, width: 1.5),
           ),
           child: Padding(
             padding: const EdgeInsets.all(18),
@@ -245,11 +313,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('OPERATIONAL NET PROFIT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.secondaryText)),
+                    Text(
+                      'OPERATIONAL NET PROFIT',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: isDark
+                            ? (netProfit >= 0 ? const Color(0xFF86EFAC) : const Color(0xFFFCA5A5))
+                            : AppColors.secondaryText,
+                      ),
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: (netProfit >= 0 ? AppColors.success : AppColors.danger).withValues(alpha: 0.15),
+                        color: profitColor.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -257,7 +334,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: netProfit >= 0 ? AppColors.success : AppColors.danger,
+                          color: profitColor,
                         ),
                       ),
                     ),
@@ -269,13 +346,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: netProfit >= 0 ? AppColors.success : AppColors.danger,
+                    color: profitColor,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Sales Revenue + Additional Income - COGS - Wastage - Operating Expenses',
-                  style: TextStyle(fontSize: 10, color: AppColors.secondaryText),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isDark
+                        ? (netProfit >= 0 ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA))
+                        : AppColors.secondaryText,
+                  ),
                 ),
               ],
             ),
@@ -292,19 +374,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisSpacing: 10,
           childAspectRatio: 1.7,
           children: [
-            _buildMetricTile('Total Sales Revenue', Formatters.currency(salesRev), AppColors.primary, Icons.trending_up),
-            _buildMetricTile('Gross Profit', Formatters.currency(grossProfit), AppColors.success, Icons.bar_chart),
-            _buildMetricTile('Operating Expenses', '- ${Formatters.currency(expenses)}', AppColors.danger, Icons.money_off),
-            _buildMetricTile('Stock Wastage', '- ${Formatters.currency(wastage)}', AppColors.warning, Icons.delete_outline),
-            _buildMetricTile('Purchases (Asset)', Formatters.currency(purchases), AppColors.info, Icons.shopping_bag_outlined),
-            _buildMetricTile('Closing Stock Value', Formatters.currency(closingStock), AppColors.primaryDark, Icons.inventory_2_outlined),
+            _buildMetricTile(
+              'Total Sales Revenue',
+              Formatters.currency(salesRev),
+              isDark ? AppColors.highlightYellow : AppColors.primary,
+              Icons.trending_up,
+            ),
+            _buildMetricTile(
+              'Gross Profit',
+              Formatters.currency(grossProfit),
+              isDark ? AppColors.highlightGreen : AppColors.success,
+              Icons.bar_chart,
+            ),
+            _buildMetricTile(
+              'Operating Expenses',
+              '- ${Formatters.currency(expenses)}',
+              isDark ? AppColors.highlightRed : AppColors.danger,
+              Icons.money_off,
+            ),
+            _buildMetricTile(
+              'Stock Wastage',
+              '- ${Formatters.currency(wastage)}',
+              isDark ? AppColors.highlightOrange : AppColors.warning,
+              Icons.delete_outline,
+            ),
+            _buildMetricTile(
+              'Purchases (Asset)',
+              Formatters.currency(purchases),
+              isDark ? AppColors.highlightYellow : AppColors.info,
+              Icons.shopping_bag_outlined,
+            ),
+            _buildMetricTile(
+              'Closing Stock Value',
+              Formatters.currency(closingStock),
+              isDark ? AppColors.highlightCream : AppColors.primaryDark,
+              Icons.inventory_2_outlined,
+            ),
           ],
         ),
 
         const SizedBox(height: 10),
         // Cash Flow banner
         Card(
-          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -312,9 +423,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.account_balance_wallet_outlined, color: netCashFlow >= 0 ? AppColors.success : AppColors.danger),
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: netCashFlow >= 0
+                          ? (isDark ? AppColors.highlightGreen : AppColors.success)
+                          : (isDark ? AppColors.highlightRed : AppColors.danger),
+                    ),
                     const SizedBox(width: 8),
-                    const Text('Net Cash Flow', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text(
+                      'Net Cash Flow',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: isDark ? AppColors.textDark : AppColors.darkText,
+                      ),
+                    ),
                   ],
                 ),
                 Text(
@@ -322,7 +445,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
-                    color: netCashFlow >= 0 ? AppColors.success : AppColors.danger,
+                    color: netCashFlow >= 0
+                        ? (isDark ? AppColors.highlightGreen : AppColors.success)
+                        : (isDark ? AppColors.highlightRed : AppColors.danger),
                   ),
                 ),
               ],
@@ -334,8 +459,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMetricTile(String title, String value, Color color, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
@@ -347,12 +472,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Icon(icon, size: 14, color: color),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text(title, style: const TextStyle(fontSize: 11, color: AppColors.secondaryText), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
@@ -363,17 +505,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_reportData == null) return const SizedBox.shrink();
     final daily = (_reportData!['daily_breakdown'] as List<dynamic>?) ?? [];
     if (daily.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Daily Revenue & Net Profit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(
+              'Daily Revenue & Net Profit',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
             const SizedBox(height: 4),
-            const Text('Gold: Sales Revenue, Green: Net Profit', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+            Text(
+              'Gold: Sales Revenue, Green: Net Profit',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+              ),
+            ),
             const SizedBox(height: 16),
             SizedBox(
               height: 180,
@@ -395,7 +550,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final dateStr = daily[idx]['date'] as String;
                             return Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Text(dateStr.substring(5), style: const TextStyle(fontSize: 9)),
+                              child: Text(
+                                dateStr.substring(5),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                                ),
+                              ),
                             );
                           }
                           return const SizedBox.shrink();
@@ -411,13 +572,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         barRods: [
                           BarChartRodData(
                             toY: max(0.0, (daily[i]['sales_revenue'] as num).toDouble()),
-                            color: AppColors.accentGold,
+                            color: isDark ? AppColors.highlightYellow : AppColors.accentGold,
                             width: 8,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           BarChartRodData(
                             toY: max(0.0, (daily[i]['net_profit'] as num).toDouble()),
-                            color: AppColors.success,
+                            color: isDark ? AppColors.highlightGreen : AppColors.success,
                             width: 8,
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -445,6 +606,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildWarningsSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final lowStock = _inventoryData.where((i) {
       final usable = (i['usable_stock'] as num).toDouble();
       final min = (i['min_stock_level'] as num).toDouble();
@@ -460,14 +622,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (lowStock.isEmpty && expiringSoon.isEmpty) {
       return Card(
-        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
-            children: const [
-              Icon(Icons.check_circle_outline, color: AppColors.success),
-              SizedBox(width: 10),
-              Text('All inventory levels healthy. No urgent alerts.', style: TextStyle(fontSize: 13, color: AppColors.success)),
+            children: [
+              Icon(Icons.check_circle_outline, color: isDark ? AppColors.highlightGreen : AppColors.success),
+              const SizedBox(width: 10),
+              Text(
+                'All inventory levels healthy. No urgent alerts.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? AppColors.highlightGreen : AppColors.success,
+                ),
+              ),
             ],
           ),
         ),
@@ -478,20 +645,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (lowStock.isNotEmpty) ...[
-          const Text('Low Stock Alerts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.danger)),
+          Text('Low Stock Alerts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? AppColors.highlightRed : AppColors.danger)),
           const SizedBox(height: 6),
           ...lowStock.map((item) {
             return Card(
-              color: const Color(0xFFFEF2F2),
+              color: isDark ? AppColors.darkDangerBackground : const Color(0xFFFEF2F2),
               margin: const EdgeInsets.only(bottom: 6),
               child: ListTile(
                 dense: true,
-                leading: const Icon(Icons.warning_amber_rounded, color: AppColors.danger),
-                title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                subtitle: Text('Current: ${Formatters.quantity(item['usable_stock'], item['measurement_unit'])} (Min: ${item['min_stock_level']})'),
+                leading: Icon(Icons.warning_amber_rounded, color: isDark ? AppColors.highlightRed : AppColors.danger),
+                title: Text(item['name'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? AppColors.textDark : AppColors.darkText)),
+                subtitle: Text('Current: ${Formatters.quantity(item['usable_stock'], item['measurement_unit'])} (Min: ${item['min_stock_level']})', style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
                 trailing: TextButton(
-                  child: const Text('Restock', style: TextStyle(color: AppColors.primary)),
-                  onPressed: () => widget.onNavigateTab(4), // Navigate to more / purchases
+                  child: Text('Restock', style: TextStyle(color: isDark ? AppColors.highlightYellow : AppColors.primary)),
+                  onPressed: () => widget.onNavigateTab(4),
                 ),
               ),
             );
@@ -499,19 +666,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         if (expiringSoon.isNotEmpty) ...[
           const SizedBox(height: 10),
-          const Text('Expiring Soon (Food Safety)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.warning)),
+          Text('Expiring Soon (Food Safety)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? AppColors.highlightOrange : AppColors.warning)),
           const SizedBox(height: 6),
           ...expiringSoon.map((item) {
             return Card(
-              color: const Color(0xFFFFFBEB),
+              color: isDark ? AppColors.darkWarningBackground : const Color(0xFFFFFBEB),
               margin: const EdgeInsets.only(bottom: 6),
               child: ListTile(
                 dense: true,
-                leading: const Icon(Icons.timer_outlined, color: AppColors.warning),
-                title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                subtitle: Text('Expires: ${item['next_expiry_date']}'),
+                leading: Icon(Icons.timer_outlined, color: isDark ? AppColors.highlightOrange : AppColors.warning),
+                title: Text(item['name'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? AppColors.textDark : AppColors.darkText)),
+                subtitle: Text('Expires: ${item['next_expiry_date']}', style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
                 trailing: TextButton(
-                  child: const Text('Wastage', style: TextStyle(color: AppColors.danger)),
+                  child: Text('Wastage', style: TextStyle(color: isDark ? AppColors.highlightRed : AppColors.danger)),
                   onPressed: () async {
                     await Navigator.push(context, MaterialPageRoute(builder: (_) => const WastageScreen()));
                     _loadDashboardData();

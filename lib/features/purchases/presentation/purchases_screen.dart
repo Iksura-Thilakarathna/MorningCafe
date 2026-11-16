@@ -231,7 +231,6 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
             final it = entry.value;
 
             return Card(
-              color: Colors.white,
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -370,7 +369,6 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
         final isCancelled = status == 'cancelled';
 
         return Card(
-          color: Colors.white,
           child: ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -378,7 +376,12 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                 Text(ref, style: TextStyle(fontWeight: FontWeight.bold, decoration: isCancelled ? TextDecoration.lineThrough : null)),
                 Text(
                   Formatters.currency(total),
-                  style: TextStyle(fontWeight: FontWeight.bold, color: isCancelled ? Colors.grey : AppColors.primary),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isCancelled
+                        ? Colors.grey
+                        : (Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary),
+                  ),
                 ),
               ],
             ),

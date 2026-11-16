@@ -125,7 +125,6 @@ class _BackupScreenState extends State<BackupScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(

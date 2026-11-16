@@ -22,68 +22,70 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final menuItems = [
       {
         'title': 'Products & Selling Prices',
         'subtitle': 'Manage product catalog, selling prices & price history',
         'icon': Icons.fastfood_outlined,
-        'color': AppColors.accentSausage,
+        'color': isDark ? AppColors.highlightOrange : AppColors.accentSausage,
         'page': const ProductsScreen(),
       },
       {
         'title': 'Product Recipes',
         'subtitle': 'Formulate recipes and ingredient explosion ratios',
         'icon': Icons.menu_book_outlined,
-        'color': AppColors.accentGold,
+        'color': isDark ? AppColors.highlightYellow : AppColors.accentGold,
         'page': const RecipesScreen(),
       },
       {
         'title': 'Purchases & Stock Inflow',
         'subtitle': 'Record shopping receipts, unit costs & batches',
         'icon': Icons.shopping_bag_outlined,
-        'color': AppColors.info,
+        'color': isDark ? AppColors.highlightYellow : AppColors.info,
         'page': const PurchasesScreen(),
       },
       {
         'title': 'Ingredients & Conversions',
         'subtitle': 'Raw materials, units & packaging multipliers',
         'icon': Icons.egg_alt_outlined,
-        'color': AppColors.warning,
+        'color': isDark ? AppColors.highlightOrange : AppColors.warning,
         'page': const IngredientsScreen(),
       },
       {
         'title': 'Stock Wastage & Losses',
         'subtitle': 'Record expired, spoiled or spilled ingredients',
         'icon': Icons.delete_outline,
-        'color': AppColors.danger,
+        'color': isDark ? AppColors.highlightRed : AppColors.danger,
         'page': const WastageScreen(),
       },
       {
         'title': 'Stock Reconciliation',
         'subtitle': 'Compare physical counts with system stock',
         'icon': Icons.fact_check_outlined,
-        'color': AppColors.primary,
+        'color': isDark ? AppColors.highlightYellow : AppColors.primary,
         'page': const StockReconciliationScreen(),
       },
       {
         'title': 'Weekly Reports & Statements',
         'subtitle': 'Net Profit, COGS, Cash Flow, PDF & CSV export',
         'icon': Icons.analytics_outlined,
-        'color': AppColors.success,
+        'color': isDark ? AppColors.highlightGreen : AppColors.success,
         'page': const ReportsScreen(),
       },
       {
         'title': 'Backup & Restore',
         'subtitle': 'Full JSON database export, share & safe restore',
         'icon': Icons.backup_outlined,
-        'color': AppColors.info,
+        'color': isDark ? AppColors.highlightOrange : AppColors.info,
         'page': const BackupScreen(),
       },
       {
         'title': 'Settings & Security',
         'subtitle': 'Business profile, biometric lock & theme mode',
         'icon': Icons.settings_outlined,
-        'color': AppColors.secondaryText,
+        'color': isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
         'page': SettingsScreen(
           currentThemeMode: currentThemeMode,
           onThemeModeChanged: onThemeModeChanged,
@@ -100,45 +102,60 @@ class MoreScreen extends StatelessWidget {
         children: [
           // Morning Cafe Brand Header
           Card(
-            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      width: 58,
-                      height: 58,
-                      fit: BoxFit.contain,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(11),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 52,
+                        height: 52,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Morning Cafe',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
-                            color: AppColors.primary,
+                            color: isDark ? AppColors.highlightYellow : AppColors.primary,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Piliyandala, Sri Lanka',
-                          style: TextStyle(fontSize: 12, color: AppColors.secondaryText),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                          ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Sausage Buns & Omelette Burgers',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.accentSausage,
+                            color: isDark ? AppColors.highlightOrange : AppColors.accentSausage,
                           ),
                         ),
                       ],
@@ -154,15 +171,30 @@ class MoreScreen extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Card(
-                color: Colors.white,
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: color.withValues(alpha: 0.12),
+                    backgroundColor: color.withValues(alpha: isDark ? 0.22 : 0.12),
                     child: Icon(item['icon'] as IconData, color: color, size: 20),
                   ),
-                  title: Text(item['title'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  subtitle: Text(item['subtitle'] as String, style: const TextStyle(fontSize: 11, color: AppColors.secondaryText)),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.secondaryText),
+                  title: Text(
+                    item['title'] as String,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isDark ? AppColors.textDark : AppColors.darkText,
+                    ),
+                  ),
+                  subtitle: Text(
+                    item['subtitle'] as String,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                  ),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => item['page'] as Widget));
                   },

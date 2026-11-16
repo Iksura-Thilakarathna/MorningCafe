@@ -160,7 +160,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 final isActive = (p['is_active'] as int) == 1;
 
                 return Card(
-                  color: Colors.white,
                   child: ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

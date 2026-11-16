@@ -212,14 +212,20 @@ class _WastageScreenState extends State<WastageScreen> with SingleTickerProvider
         final cost = (w['total_cost'] as num).toDouble();
         final qty = (w['quantity'] as num).toDouble();
         final unit = w['unit'] as String;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Card(
-          color: Colors.white,
           child: ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(w['ingredient_name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(Formatters.currency(cost), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.warning)),
+                Text(
+                  Formatters.currency(cost),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.highlightOrange : AppColors.warning,
+                  ),
+                ),
               ],
             ),
             subtitle: Text('Wasted: ${Formatters.quantity(qty, unit)} • Reason: ${w['reason']}\nDate: ${w['wastage_date']}'),

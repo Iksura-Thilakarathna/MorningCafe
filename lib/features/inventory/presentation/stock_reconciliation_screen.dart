@@ -157,7 +157,6 @@ class _StockReconciliationScreenState extends State<StockReconciliationScreen> {
                       final controller = _controllers[id];
 
                       return Card(
-                        color: Colors.white,
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Row(

@@ -83,6 +83,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Application Settings'),
@@ -92,33 +93,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           // Business Profile
           Card(
-            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      width: 64,
-                      height: 64,
-                      fit: BoxFit.contain,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(11),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 58,
+                        height: 58,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Morning Cafe Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.primary)),
-                        SizedBox(height: 6),
-                        Text('Location: ${AppConstants.businessLocation}', style: TextStyle(fontSize: 12, color: AppColors.darkText)),
-                        SizedBox(height: 3),
-                        Text('Currency: ${AppConstants.defaultCurrency}', style: TextStyle(fontSize: 12, color: AppColors.darkText)),
-                        SizedBox(height: 3),
-                        Text('Timezone: ${AppConstants.defaultTimezone}', style: TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+                      children: [
+                        Text(
+                          'Morning Cafe Profile',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Location: ${AppConstants.businessLocation}',
+                          style: TextStyle(fontSize: 12, color: isDark ? AppColors.textDark : AppColors.darkText),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Currency: ${AppConstants.defaultCurrency}',
+                          style: TextStyle(fontSize: 12, color: isDark ? AppColors.textDark : AppColors.darkText),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Timezone: ${AppConstants.defaultTimezone}',
+                          style: TextStyle(fontSize: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                        ),
                       ],
                     ),
                   ),
@@ -130,13 +156,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Appearance & Security
           Card(
-            color: Colors.white,
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.dark_mode_outlined, color: AppColors.primary),
-                  title: const Text('Theme Mode', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  subtitle: Text(widget.currentThemeMode.name.toUpperCase()),
+                  leading: Icon(Icons.dark_mode_outlined, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+                  title: Text(
+                    'Theme Mode',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isDark ? AppColors.textDark : AppColors.darkText,
+                    ),
+                  ),
+                  subtitle: Text(
+                    widget.currentThemeMode.name.toUpperCase(),
+                    style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                  ),
                   trailing: DropdownButton<ThemeMode>(
                     value: widget.currentThemeMode,
                     underline: const SizedBox.shrink(),
@@ -152,9 +187,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(height: 1),
                 SwitchListTile(
-                  secondary: const Icon(Icons.fingerprint, color: AppColors.primary),
-                  title: const Text('Biometric App Lock', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  subtitle: const Text('Require fingerprint or face ID to open app'),
+                  secondary: Icon(Icons.fingerprint, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+                  title: Text(
+                    'Biometric App Lock',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: isDark ? AppColors.textDark : AppColors.darkText,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Require fingerprint or face ID to open app',
+                    style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                  ),
                   value: _biometricEnabled,
                   onChanged: _toggleBiometric,
                 ),
@@ -165,23 +210,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Database Statistics
           Card(
-            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Database Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(
+                    'Database Information',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isDark ? AppColors.textDark : AppColors.darkText,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Local SQLite storage with foreign key safety and audit ledger.', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+                  Text(
+                    'Local SQLite storage with foreign key safety and audit ledger.',
+                    style: TextStyle(fontSize: 11, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                  ),
                   const Divider(height: 18),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: _dbStats.entries.map((e) {
                       return Column(
                         children: [
-                          Text('${e.value}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primary)),
-                          Text(e.key, style: const TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+                          Text(
+                            '${e.value}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            e.key,
+                            style: TextStyle(fontSize: 11, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                          ),
                         ],
                       );
                     }).toList(),

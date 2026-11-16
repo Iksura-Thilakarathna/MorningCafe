@@ -250,39 +250,71 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildStatementCard() {
     if (_data == null) return const SizedBox.shrink();
     final d = _data!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final netProfit = (d['net_profit'] as num).toDouble();
 
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Financial Statement', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Text('${Formatters.date(_startDate)} to ${Formatters.date(_endDate)}', style: const TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+            Text(
+              'Financial Statement',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
+            Text(
+              '${Formatters.date(_startDate)} to ${Formatters.date(_endDate)}',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+              ),
+            ),
             const Divider(height: 20),
             _buildRow('Sales Revenue', Formatters.currency(d['sales_revenue'])),
-            _buildRow('Additional Business Income', '+ ${Formatters.currency(d['additional_income'])}', color: AppColors.success),
+            _buildRow(
+              'Additional Business Income',
+              '+ ${Formatters.currency(d['additional_income'])}',
+              color: isDark ? AppColors.highlightGreen : AppColors.success,
+            ),
             _buildRow('Total Business Income', Formatters.currency(d['total_business_income']), isBold: true),
             const Divider(height: 16),
-            _buildRow('Cost of Products Sold (COGS - FIFO)', '- ${Formatters.currency(d['cogs'])}', color: AppColors.danger),
+            _buildRow(
+              'Cost of Products Sold (COGS - FIFO)',
+              '- ${Formatters.currency(d['cogs'])}',
+              color: isDark ? AppColors.highlightRed : AppColors.danger,
+            ),
             _buildRow('Gross Profit', Formatters.currency(d['gross_profit']), isBold: true),
             const Divider(height: 16),
-            _buildRow('Stock Wastage Cost', '- ${Formatters.currency(d['wastage_cost'])}', color: AppColors.warning),
-            _buildRow('Additional Operating Expenses', '- ${Formatters.currency(d['operating_expenses'])}', color: AppColors.danger),
+            _buildRow(
+              'Stock Wastage Cost',
+              '- ${Formatters.currency(d['wastage_cost'])}',
+              color: isDark ? AppColors.highlightOrange : AppColors.warning,
+            ),
+            _buildRow(
+              'Additional Operating Expenses',
+              '- ${Formatters.currency(d['operating_expenses'])}',
+              color: isDark ? AppColors.highlightRed : AppColors.danger,
+            ),
             const Divider(height: 20, thickness: 1.5),
             _buildRow(
               'OPERATIONAL NET PROFIT',
               Formatters.currency(d['net_profit']),
               isBold: true,
               fontSize: 16,
-              color: (d['net_profit'] as num) >= 0 ? AppColors.success : AppColors.danger,
+              color: netProfit >= 0
+                  ? (isDark ? AppColors.highlightGreen : AppColors.success)
+                  : (isDark ? AppColors.highlightRed : AppColors.danger),
             ),
             const SizedBox(height: 4),
             _buildRow(
               'Profit Margin (% of Sales)',
               '${(d['profit_margin'] as num).toStringAsFixed(2)}%',
-              color: AppColors.secondaryText,
+              color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
             ),
           ],
         ),
@@ -293,24 +325,54 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildInventoryReconciliationCard() {
     if (_data == null) return const SizedBox.shrink();
     final d = _data!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Inventory Asset Reconciliation (Section 18.7 & 20)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(
+              'Inventory Asset Reconciliation (Section 18.7 & 20)',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
             const SizedBox(height: 4),
-            const Text('Purchases are capitalized as inventory assets and deducted via COGS as consumed.', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+            Text(
+              'Purchases are capitalized as inventory assets and deducted via COGS as consumed.',
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+              ),
+            ),
             const Divider(height: 16),
             _buildRow('Opening Inventory Valuation', Formatters.currency(d['opening_inventory_value'])),
-            _buildRow('Total Ingredient Purchases in Period', '+ ${Formatters.currency(d['total_purchases'])}', color: AppColors.info),
-            _buildRow('Cost of Ingredients Consumed (COGS)', '- ${Formatters.currency(d['cogs'])}', color: AppColors.danger),
-            _buildRow('Stock Wastage Cost in Period', '- ${Formatters.currency(d['wastage_cost'])}', color: AppColors.warning),
+            _buildRow(
+              'Total Ingredient Purchases in Period',
+              '+ ${Formatters.currency(d['total_purchases'])}',
+              color: isDark ? AppColors.highlightYellow : AppColors.info,
+            ),
+            _buildRow(
+              'Cost of Ingredients Consumed (COGS)',
+              '- ${Formatters.currency(d['cogs'])}',
+              color: isDark ? AppColors.highlightRed : AppColors.danger,
+            ),
+            _buildRow(
+              'Stock Wastage Cost in Period',
+              '- ${Formatters.currency(d['wastage_cost'])}',
+              color: isDark ? AppColors.highlightOrange : AppColors.warning,
+            ),
             const Divider(height: 16),
-            _buildRow('Closing Inventory Valuation', Formatters.currency(d['closing_inventory_value']), isBold: true, color: AppColors.primary),
+            _buildRow(
+              'Closing Inventory Valuation',
+              Formatters.currency(d['closing_inventory_value']),
+              isBold: true,
+              color: isDark ? AppColors.highlightYellow : AppColors.primary,
+            ),
           ],
         ),
       ),
@@ -320,18 +382,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildProductBreakdownCard() {
     if (_data == null) return const SizedBox.shrink();
     final prods = (_data!['product_breakdown'] as List<dynamic>?) ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Product Sales Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(
+              'Product Sales Breakdown',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
             const Divider(height: 16),
             if (prods.isEmpty)
-              const Text('No product sales recorded in this period.', style: TextStyle(fontSize: 12, color: AppColors.secondaryText))
+              Text(
+                'No product sales recorded in this period.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                ),
+              )
             else
               ...prods.map((p) {
                 final sold = (p['units_sold'] as num).toInt();
@@ -341,8 +416,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${p['name']} ($sold units)', style: const TextStyle(fontSize: 13)),
-                      Text(Formatters.currency(rev), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(
+                        '${p['name']} ($sold units)',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? AppColors.textDark : AppColors.darkText,
+                        ),
+                      ),
+                      Text(
+                        Formatters.currency(rev),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -356,15 +444,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildDailyBreakdownCard() {
     if (_data == null) return const SizedBox.shrink();
     final daily = (_data!['daily_breakdown'] as List<dynamic>?) ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Daily Breakdown Table', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(
+              'Daily Breakdown Table',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
             const Divider(height: 16),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -404,6 +499,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget _buildRow(String label, String value, {bool isBold = false, double fontSize = 13, Color? color}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
@@ -414,7 +510,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isBold ? AppColors.darkText : AppColors.secondaryText,
+              color: isBold
+                  ? (isDark ? AppColors.textDark : AppColors.darkText)
+                  : (isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
             ),
           ),
           Text(
@@ -422,7 +520,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: color ?? (isBold ? AppColors.darkText : AppColors.darkText),
+              color: color ?? (isDark ? AppColors.textDark : AppColors.darkText),
             ),
           ),
         ],

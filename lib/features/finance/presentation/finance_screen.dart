@@ -240,13 +240,14 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Finance & Operations'),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.primary,
-          indicatorColor: AppColors.primary,
+          labelColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+          indicatorColor: isDark ? AppColors.highlightYellow : AppColors.primary,
           tabs: const [
             Tab(text: 'Cash Flow'),
             Tab(text: 'Income'),
@@ -265,7 +266,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
+        backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
         onPressed: () {
           if (_tabController.index == 1) {
             _showAddIncomeModal();
@@ -273,7 +274,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
             _showAddExpenseModal();
           }
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: isDark ? const Color(0xFF160E0A) : Colors.white),
       ),
     );
   }
@@ -281,6 +282,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
   Widget _buildCashFlowTab() {
     if (_cashFlowData == null) return const SizedBox.shrink();
     final d = _cashFlowData!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final inflows = (d['cash_inflows'] as num).toDouble();
     final outflows = (d['cash_outflows'] as num).toDouble();
     final netCash = (d['net_cash_flow'] as num).toDouble();
@@ -292,40 +294,79 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('This Week Cash Flow Position', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text(
+                    'This Week Cash Flow Position',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isDark ? AppColors.textDark : AppColors.darkText,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Cash Inflows (Collections):', style: TextStyle(fontSize: 13, color: AppColors.secondaryText)),
-                      Text(Formatters.currency(inflows), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.success)),
+                      Text(
+                        'Total Cash Inflows (Collections):',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                        ),
+                      ),
+                      Text(
+                        Formatters.currency(inflows),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.highlightGreen : AppColors.success,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Cash Outflows (Payments):', style: TextStyle(fontSize: 13, color: AppColors.secondaryText)),
-                      Text('- ${Formatters.currency(outflows)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.danger)),
+                      Text(
+                        'Total Cash Outflows (Payments):',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                        ),
+                      ),
+                      Text(
+                        '- ${Formatters.currency(outflows)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.highlightRed : AppColors.danger,
+                        ),
+                      ),
                     ],
                   ),
                   const Divider(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('NET CASH FLOW:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text(
+                        'NET CASH FLOW:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.textDark : AppColors.darkText,
+                        ),
+                      ),
                       Text(
                         Formatters.currency(netCash),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: netCash >= 0 ? AppColors.success : AppColors.danger,
+                          color: netCash >= 0
+                              ? (isDark ? AppColors.highlightGreen : AppColors.success)
+                              : (isDark ? AppColors.highlightRed : AppColors.danger),
                         ),
                       ),
                     ],
@@ -336,17 +377,27 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
           ),
           const SizedBox(height: 14),
           Card(
-            color: AppColors.infoBackground,
+            color: isDark ? AppColors.darkInfoBackground : AppColors.infoBackground,
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Cash Flow vs Net Profit (Section 19)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryDark)),
+                  Text(
+                    'Cash Flow vs Net Profit (Section 19)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isDark ? AppColors.highlightYellow : AppColors.primaryDark,
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     'Operational Net Profit (${Formatters.currency(netProfit)}) represents business value generated from food sales minus actual consumed ingredients.\nNet Cash Flow (${Formatters.currency(netCash)}) tracks real cash collected minus purchases & bills paid.',
-                    style: const TextStyle(fontSize: 11, color: AppColors.primaryDark),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? AppColors.textDark : AppColors.primaryDark,
+                    ),
                   ),
                 ],
               ),
@@ -361,6 +412,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
     if (_incomeList.isEmpty) {
       return const Center(child: Text('No additional income recorded. Tap + to add.'));
     }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: _incomeList.length,
@@ -370,13 +422,26 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
         final amt = (item['amount'] as num).toDouble();
         final status = item['payment_status'] as String;
         return Card(
-          color: Colors.white,
           child: ListTile(
-            title: Text(item['description'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            subtitle: Text('${item['category']} • ${item['transaction_date']} • Status: $status'),
+            title: Text(
+              item['description'],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
+            subtitle: Text(
+              '${item['category']} • ${item['transaction_date']} • Status: $status',
+              style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+            ),
             trailing: Text(
               Formatters.currency(amt),
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.success, fontSize: 15),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.highlightGreen : AppColors.success,
+                fontSize: 15,
+              ),
             ),
           ),
         );
@@ -388,6 +453,7 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
     if (_expenseList.isEmpty) {
       return const Center(child: Text('No operating expenses recorded. Tap + to add.'));
     }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: _expenseList.length,
@@ -397,13 +463,26 @@ class _FinanceScreenState extends State<FinanceScreen> with SingleTickerProvider
         final amt = (item['amount'] as num).toDouble();
         final status = item['payment_status'] as String;
         return Card(
-          color: Colors.white,
           child: ListTile(
-            title: Text(item['description'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            subtitle: Text('${item['category']} • ${item['expense_date']} • Status: $status'),
+            title: Text(
+              item['description'],
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isDark ? AppColors.textDark : AppColors.darkText,
+              ),
+            ),
+            subtitle: Text(
+              '${item['category']} • ${item['expense_date']} • Status: $status',
+              style: TextStyle(color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+            ),
             trailing: Text(
               '- ${Formatters.currency(amt)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.danger, fontSize: 15),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.highlightRed : AppColors.danger,
+                fontSize: 15,
+              ),
             ),
           ),
         );

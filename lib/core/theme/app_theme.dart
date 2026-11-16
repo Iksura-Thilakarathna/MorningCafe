@@ -1,45 +1,78 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Brand Palette (Faithfully derived from Morning Cafe Logo)
-  // 1. Deep Espresso / Dark Roasted Coffee
-  static const Color primary = Color(0xFF381A0B);
-  static const Color primaryDark = Color(0xFF241006);
-  static const Color primaryLight = Color(0xFF5E311B);
+  // Brand Foundation (Morning Cafe Logo)
+  static const Color primary = Color(0xFF381A0B); // Deep Roast Espresso
+  static const Color primaryDark = Color(0xFF241006); // Dark Mocha
+  static const Color primaryLight = Color(0xFF5E311B); // Warm Roast
 
-  // 2. Golden Brioche / Morning Sunburst
-  static const Color accentGold = Color(0xFFE5A328);
+  // Brand Accents
+  static const Color accentGold = Color(0xFFE5A328); // Golden Brioche Bun & Sunburst
   static const Color accentGoldLight = Color(0xFFF6CA6B);
-
-  // 3. Savory Paprika Sausage Red-Brown & Steam Orange
-  static const Color accentSausage = Color(0xFFA83F1E);
-  static const Color accentSteam = Color(0xFFD75C27);
+  static const Color accentSausage = Color(0xFFA83F1E); // Savory Paprika Sausage
+  static const Color accentSteam = Color(0xFFD75C27); // Warm Steam Orange
   static const Color accentCafe = Color(0xFFE5A328); // Backward compatibility
 
-  // Text & Background (Warm Artisan Bakery & Cafe)
-  static const Color darkText = Color(0xFF2A150A); // Deep Espresso
-  static const Color secondaryText = Color(0xFF756256); // Warm Roasted Hazelnut
+  // VIBRANT HIGHLIGHT COLORS (High-contrast, glowing in Dark Mode)
+  static const Color highlightYellow = Color(0xFFFBBF24); // Glowing Amber Gold
+  static const Color highlightOrange = Color(0xFFFB923C); // Bright Paprika Flame
+  static const Color highlightGreen = Color(0xFF22C55E); // Electric Emerald Green
+  static const Color highlightRed = Color(0xFFF87171); // Soft Coral Red
+  static const Color highlightCream = Color(0xFFFAF3EC); // Crisp Oat Milk White
+
+  // Surfaces & Backgrounds (Light Theme - Warm Artisan Linen)
   static const Color backgroundLight = Color(0xFFFAF7F2); // Warm Cream Linen
   static const Color cardLight = Color(0xFFFFFFFF); // Crisp Pure White
   static const Color surfaceWarm = Color(0xFFF5EEE4); // Warm Latte Tint
   static const Color borderLight = Color(0xFFEADBCE); // Soft Warm Cafe Border
+  static const Color darkText = Color(0xFF2A150A); // Deep Espresso
+  static const Color secondaryText = Color(0xFF756256); // Warm Roasted Hazelnut
 
-  // Financial Semantics (Harmonized with Warm Palette)
-  static const Color success = Color(0xFF1B7A42); // Fresh Herb Emerald (Profit & Income)
+  // Financial Semantics (Light Mode)
+  static const Color success = Color(0xFF1B7A42); // Fresh Herb Emerald
   static const Color successBackground = Color(0xFFF0FDF4); // Soft Emerald Tint
-  static const Color danger = Color(0xFFBF361B); // Roasted Paprika Red (Expenses & Losses)
+  static const Color danger = Color(0xFFBF361B); // Roasted Paprika Red
   static const Color dangerBackground = Color(0xFFFEF2F2); // Soft Crimson Tint
-  static const Color warning = Color(0xFFD97706); // Warm Amber Sun (Wastage & Low Stock)
+  static const Color warning = Color(0xFFD97706); // Warm Amber Sun
   static const Color warningBackground = Color(0xFFFFFBEB); // Soft Amber Tint
-  static const Color info = Color(0xFF8C533A); // Cinnamon Mocha (Purchases & Capital Assets)
+  static const Color info = Color(0xFF8C533A); // Cinnamon Mocha
   static const Color infoBackground = Color(0xFFFAF2ED); // Soft Cinnamon Tint
 
-  // Dark Theme Palette (Cozy Evening Cafe)
-  static const Color backgroundDark = Color(0xFF160E0A); // Dark Roast Night
-  static const Color cardDark = Color(0xFF231712); // Rich Roasted Bean
+  // Surfaces & Backgrounds (Dark Theme - Rich Roasted Espresso Night)
+  static const Color backgroundDark = Color(0xFF140D09); // Deep Roasted Espresso
+  static const Color cardDark = Color(0xFF221610); // Rich Roasted Bean Card
+  static const Color surfaceWarmDark = Color(0xFF2B1C15); // Subtle Warm Dark Tint
   static const Color textDark = Color(0xFFFAF3EC); // Steamed Oat Milk White
-  static const Color secondaryTextDark = Color(0xFFB5A196); // Warm Biscuit
-  static const Color borderDark = Color(0xFF3C281F); // Dark Cocoa Border
+  static const Color secondaryTextDark = Color(0xFFB5A196); // Warm Biscuit Grey
+  static const Color borderDark = Color(0xFF38251C); // Subtle Dark Cocoa Border
+
+  // Financial Semantics (Dark Mode Backgrounds)
+  static const Color darkSuccessBackground = Color(0xFF12281B); // Deep Forest Emerald
+  static const Color darkDangerBackground = Color(0xFF2D1210); // Deep Dark Crimson
+  static const Color darkWarningBackground = Color(0xFF2D1C0E); // Deep Dark Amber
+  static const Color darkInfoBackground = Color(0xFF281912); // Deep Dark Mocha
+
+  // Dynamic Helpers based on Brightness
+  static Color text(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? textDark : darkText;
+
+  static Color subtext(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? secondaryTextDark : secondaryText;
+
+  static Color card(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? cardDark : cardLight;
+
+  static Color border(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? borderDark : borderLight;
+
+  static Color profit(BuildContext context, double amount) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (amount >= 0) {
+      return isDark ? highlightGreen : success;
+    } else {
+      return isDark ? highlightRed : danger;
+    }
+  }
 }
 
 class AppTheme {
@@ -54,6 +87,7 @@ class AppTheme {
         secondary: AppColors.accentGold,
         tertiary: AppColors.accentSausage,
         surface: AppColors.cardLight,
+        onSurface: AppColors.darkText,
       ),
       scaffoldBackgroundColor: AppColors.backgroundLight,
       cardTheme: CardThemeData(
@@ -154,11 +188,14 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
+        seedColor: AppColors.accentGold,
         brightness: Brightness.dark,
-        primary: AppColors.accentGold,
-        secondary: AppColors.accentSausage,
+        primary: AppColors.highlightYellow,
+        secondary: AppColors.highlightOrange,
+        tertiary: AppColors.highlightGreen,
         surface: AppColors.cardDark,
+        onSurface: AppColors.textDark,
+        onPrimary: AppColors.primaryDark,
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
       cardTheme: CardThemeData(
@@ -184,13 +221,13 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.cardDark,
         elevation: 2,
-        indicatorColor: AppColors.accentGold.withValues(alpha: 0.28),
+        indicatorColor: AppColors.highlightYellow.withValues(alpha: 0.22),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: AppColors.accentGold,
+              color: AppColors.highlightYellow,
             );
           }
           return const TextStyle(
@@ -213,33 +250,43 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.accentGold, width: 2),
+          borderSide: const BorderSide(color: AppColors.highlightYellow, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accentGold,
-          foregroundColor: AppColors.primaryDark,
+          backgroundColor: AppColors.highlightYellow,
+          foregroundColor: const Color(0xFF160E0A),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.accentGold,
-          side: const BorderSide(color: AppColors.accentGold, width: 1.2),
+          foregroundColor: AppColors.highlightYellow,
+          side: const BorderSide(color: AppColors.highlightYellow, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.accentGold,
-        foregroundColor: AppColors.primaryDark,
+        backgroundColor: AppColors.highlightYellow,
+        foregroundColor: Color(0xFF160E0A),
         elevation: 3,
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderDark),
+        ),
+        backgroundColor: AppColors.cardDark,
+        selectedColor: AppColors.highlightYellow.withValues(alpha: 0.25),
+        labelStyle: const TextStyle(fontSize: 12, color: AppColors.textDark),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
     );
   }

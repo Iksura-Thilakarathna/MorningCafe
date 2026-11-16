@@ -69,11 +69,13 @@ class _StockMovementsScreenState extends State<StockMovementsScreen> {
                     final type = m['movement_type'] as String;
                     final code = m['movement_code'] as String;
 
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
                     final isAddition = qty > 0;
-                    final color = isAddition ? AppColors.success : AppColors.danger;
+                    final color = isAddition
+                        ? (isDark ? AppColors.highlightGreen : AppColors.success)
+                        : (isDark ? AppColors.highlightRed : AppColors.danger);
 
                     return Card(
-                      color: Colors.white,
                       child: ListTile(
                         dense: true,
                         leading: CircleAvatar(

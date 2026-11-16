@@ -222,16 +222,20 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   Widget _buildDateSelector() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      color: Colors.white,
       child: ListTile(
-        leading: const Icon(Icons.calendar_month, color: AppColors.primary),
-        title: const Text('Sale Date', style: TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+        leading: Icon(Icons.calendar_month, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+        title: Text('Sale Date', style: TextStyle(fontSize: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
         subtitle: Text(
           Formatters.displayDate(Formatters.date(_selectedDate)),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? AppColors.textDark : AppColors.darkText),
         ),
         trailing: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+            side: BorderSide(color: isDark ? AppColors.highlightYellow : AppColors.primary),
+          ),
           child: const Text('Change'),
           onPressed: () async {
             final picked = await showDatePicker(
@@ -251,16 +255,16 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   Widget _buildProductQuantitiesCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enter Quantities Sold', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            Text('Enter Quantities Sold', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: isDark ? AppColors.textDark : AppColors.darkText)),
             const SizedBox(height: 4),
-            const Text('Tap + or - to record items sold today', style: TextStyle(fontSize: 12, color: AppColors.secondaryText)),
+            Text('Tap + or - to record items sold today', style: TextStyle(fontSize: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
             const Divider(height: 24),
             ..._products.map((p) {
               final pid = p['id'] as int;
@@ -277,10 +281,10 @@ class _SalesScreenState extends State<SalesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                          Text(name, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: isDark ? AppColors.textDark : AppColors.darkText)),
                           Text(
                             '${Formatters.currency(price)} each • Total: ${Formatters.currency(lineTotal)}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
+                            style: TextStyle(fontSize: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
                           ),
                         ],
                       ),
@@ -288,16 +292,16 @@ class _SalesScreenState extends State<SalesScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, color: AppColors.secondaryText),
+                          icon: Icon(Icons.remove_circle_outline, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
                           onPressed: () => _updateQuantity(pid, -1),
                         ),
                         Container(
                           width: 44,
                           alignment: Alignment.center,
-                          child: Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: Text('$qty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? AppColors.textDark : AppColors.darkText)),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add_circle, color: AppColors.primary),
+                          icon: Icon(Icons.add_circle, color: isDark ? AppColors.highlightYellow : AppColors.primary),
                           onPressed: () => _updateQuantity(pid, 1),
                         ),
                       ],
@@ -314,9 +318,10 @@ class _SalesScreenState extends State<SalesScreen> {
 
   Widget _buildExpectedUsageCard() {
     if (_expectedUsageList.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
-      color: AppColors.surfaceWarm,
+      color: isDark ? AppColors.surfaceWarmDark : AppColors.surfaceWarm,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -325,12 +330,12 @@ class _SalesScreenState extends State<SalesScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Expected Ingredient Consumption', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                Text('${_expectedUsageList.length} items', style: const TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+                Text('Expected Ingredient Consumption', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? AppColors.textDark : AppColors.darkText)),
+                Text('${_expectedUsageList.length} items', style: TextStyle(fontSize: 11, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
               ],
             ),
             const SizedBox(height: 6),
-            const Text('Automatically calculated via recipes and deducted via FIFO', style: TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+            Text('Automatically calculated via recipes and deducted via FIFO', style: TextStyle(fontSize: 11, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText)),
             const Divider(height: 18),
             ..._expectedUsageList.map((u) {
               final name = u['name'] as String;
@@ -341,8 +346,15 @@ class _SalesScreenState extends State<SalesScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(name, style: const TextStyle(fontSize: 12)),
-                    Text(Formatters.quantity(qty, unit), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text(name, style: TextStyle(fontSize: 12, color: isDark ? AppColors.textDark : AppColors.darkText)),
+                    Text(
+                      Formatters.quantity(qty, unit),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -354,15 +366,20 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   Widget _buildSaveButton(double totalRevenue) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Daily Sales Revenue:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            Text('Daily Sales Revenue:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textDark : AppColors.darkText)),
             Text(
               Formatters.currency(totalRevenue),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.success),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: isDark ? AppColors.highlightGreen : AppColors.success,
+              ),
             ),
           ],
         ),
@@ -372,9 +389,12 @@ class _SalesScreenState extends State<SalesScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveDailySales,
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+              foregroundColor: isDark ? const Color(0xFF160E0A) : Colors.white,
+            ),
             child: _isSaving
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? CircularProgressIndicator(color: isDark ? const Color(0xFF160E0A) : Colors.white)
                 : const Text('Save Daily Sales', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ),
         ),

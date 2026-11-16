@@ -203,7 +203,6 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 final items = _recipeItems[pid] ?? [];
 
                 return Card(
-                  color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(

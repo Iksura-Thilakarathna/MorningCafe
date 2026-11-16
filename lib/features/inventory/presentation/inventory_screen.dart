@@ -97,26 +97,45 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   Widget _buildValuationBanner(double totalValuation) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      color: AppColors.primary,
+      color: isDark ? AppColors.cardDark : AppColors.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? AppColors.highlightYellow : AppColors.borderLight,
+          width: isDark ? 1.5 : 1,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'TOTAL INVENTORY VALUATION',
-              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: isDark ? AppColors.highlightYellow : Colors.white70,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               Formatters.currency(totalValuation),
-              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
+              style: TextStyle(
+                color: isDark ? AppColors.highlightYellow : Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 6),
-            const Text(
+            Text(
               'Cost of all remaining active stock batches (FIFO valued)',
-              style: TextStyle(color: Colors.white70, fontSize: 11),
+              style: TextStyle(
+                color: isDark ? AppColors.secondaryTextDark : Colors.white70,
+                fontSize: 11,
+              ),
             ),
           ],
         ),
@@ -177,6 +196,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -197,7 +217,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
         final hasExpired = expired > 0.0001;
 
         return Card(
-          color: Colors.white,
           child: InkWell(
             borderRadius: BorderRadius.circular(14),
             onTap: () => _showBatchesDialog(id, name, unit),
@@ -209,8 +228,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      Text(Formatters.currency(val), style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: isDark ? AppColors.textDark : AppColors.darkText,
+                        ),
+                      ),
+                      Text(
+                        Formatters.currency(val),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -221,29 +253,57 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: isLowStock ? AppColors.danger : AppColors.darkText,
+                          color: isLowStock
+                              ? (isDark ? AppColors.highlightRed : AppColors.danger)
+                              : (isDark ? AppColors.textDark : AppColors.darkText),
                         ),
                       ),
                       const SizedBox(width: 8),
                       if (isLowStock)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(4)),
-                          child: const Text('LOW STOCK', style: TextStyle(fontSize: 10, color: AppColors.danger, fontWeight: FontWeight.bold)),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.darkDangerBackground : const Color(0xFFFEF2F2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'LOW STOCK',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isDark ? AppColors.highlightRed : AppColors.danger,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       if (hasExpired) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(color: const Color(0xFFFFFBEB), borderRadius: BorderRadius.circular(4)),
-                          child: Text('${Formatters.quantity(expired, unit)} EXPIRED', style: const TextStyle(fontSize: 10, color: AppColors.warning, fontWeight: FontWeight.bold)),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.darkWarningBackground : const Color(0xFFFFFBEB),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${Formatters.quantity(expired, unit)} EXPIRED',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isDark ? AppColors.highlightOrange : AppColors.warning,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ],
                   ),
                   if (nextExp != null) ...[
                     const SizedBox(height: 4),
-                    Text('Next batch expiry: $nextExp', style: const TextStyle(fontSize: 11, color: AppColors.secondaryText)),
+                    Text(
+                      'Next batch expiry: $nextExp',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                      ),
+                    ),
                   ],
                 ],
               ),

@@ -234,14 +234,21 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                 final storage = ing['default_storage_info'] ?? 'General storage';
                 final days = ing['default_usable_days'];
 
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 return Card(
-                  color: Colors.white,
                   child: ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        Text('Base: $unit', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 13)),
+                        Text(
+                          'Base: $unit',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                     subtitle: Column(

@@ -99,51 +99,79 @@ class _MorningCafeAppState extends State<MorningCafeApp> {
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
       home: (_checkingAuth || !_isAuthenticated)
-          ? Scaffold(
-              backgroundColor: AppColors.backgroundLight,
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          width: 140,
-                          height: 140,
-                          fit: BoxFit.contain,
-                        ),
+          ? Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Scaffold(
+                  backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                  body: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.1),
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(18),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                width: 130,
+                                height: 130,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Morning Cafe',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Piliyandala, Sri Lanka',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          ElevatedButton.icon(
+                            icon: Icon(
+                              Icons.fingerprint,
+                              size: 22,
+                              color: isDark ? const Color(0xFF160E0A) : Colors.white,
+                            ),
+                            label: const Text('Unlock Business Records'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                              foregroundColor: isDark ? const Color(0xFF160E0A) : Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
+                            onPressed: _authenticateBiometric,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Morning Cafe',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 22,
-                          color: AppColors.primary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Piliyandala, Sri Lanka',
-                        style: TextStyle(fontSize: 13, color: AppColors.secondaryText),
-                      ),
-                      const SizedBox(height: 28),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.fingerprint, size: 22),
-                        label: const Text('Unlock Business Records'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        ),
-                        onPressed: _authenticateBiometric,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             )
           : HomeNavigationScreen(
               currentThemeMode: _themeMode,
