@@ -1,5 +1,9 @@
 # Morning Cafe Business Manager
 
+<p align="center">
+  <img src="assets/images/logo.png" alt="Morning Cafe Brand Logo" width="180" />
+</p>
+
 > Production-quality, 100% offline native Android mobile application designed for **Morning Cafe**, a small food business in Piliyandala, Sri Lanka.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.50.0-02569B?logo=flutter)](https://flutter.dev)
