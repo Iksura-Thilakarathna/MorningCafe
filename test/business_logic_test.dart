@@ -111,6 +111,29 @@ void main() {
     });
 
     // -------------------------------------------------------------
+    // Test 2b: Omelette burger recipe consumption (2 tomato slices/burger)
+    // -------------------------------------------------------------
+    test('2b. Omelette burger recipe consumes 2 tomato slices per burger', () async {
+      final recipe = await recipeService.getRecipeForProduct(3); // Omelette Burger
+      expect(recipe, isNotNull);
+      final version = await recipeService.getActiveRecipeVersion(recipe!['id'] as int);
+      final items = await recipeService.getRecipeItems(version!['id'] as int);
+
+      final tomatoItem = items.firstWhere(
+        (i) => (i['ingredient_name'] as String).toLowerCase().contains('tomato slice'),
+      );
+      expect(tomatoItem['quantity'], equals(2.0));
+      expect(tomatoItem['unit'], equals('slices'));
+
+      // Preview consumption for 10 Omelette Burgers
+      final preview = await salesService.previewRecipeRequirements({3: 10});
+      final tomatoReq = preview.firstWhere(
+        (p) => (p['ingredient_name'] as String).toLowerCase().contains('tomato slice'),
+      );
+      expect(tomatoReq['total_quantity'], equals(20.0)); // 10 burgers * 2 = 20 slices
+    });
+
+    // -------------------------------------------------------------
     // Test 3: FIFO inventory costing (50@20, 30@22; consume 60 -> 1220)
     // -------------------------------------------------------------
     test('3. FIFO inventory costing: 50 @ 20, 30 @ 22; consume 60 -> cost 1,220, rem qty 20, rem val 440', () async {

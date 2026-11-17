@@ -8,6 +8,7 @@ class AppConstants {
   // Standard Units
   static const List<String> standardUnits = [
     'pieces',
+    'slices',
     'bottles',
     'packs',
     'grams',

@@ -111,15 +111,41 @@ class _RecipesScreenState extends State<RecipesScreen> {
                           children: [
                             Expanded(
                               flex: 3,
-                              child: Text(ing['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                              child: DropdownButtonFormField<int>(
+                                value: ingId,
+                                isDense: true,
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                ),
+                                items: allIngredients.map((i) {
+                                  return DropdownMenuItem<int>(
+                                    value: i['id'] as int,
+                                    child: Text(
+                                      i['name'] as String,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (newId) {
+                                  if (newId != null) {
+                                    final selected = allIngredients.firstWhere((i) => i['id'] == newId);
+                                    setModalState(() {
+                                      it['ingredient_id'] = newId;
+                                      it['unit'] = selected['measurement_unit'] as String;
+                                    });
+                                  }
+                                },
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Expanded(
                               flex: 2,
                               child: TextFormField(
                                 initialValue: it['quantity'].toString(),
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: InputDecoration(
-                                  suffixText: ing['measurement_unit'],
+                                  suffixText: it['unit'] as String? ?? ing['measurement_unit'],
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                 ),
                                 onChanged: (v) {
@@ -143,11 +169,16 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       label: const Text('Add Ingredient to Recipe'),
                       onPressed: () {
                         if (allIngredients.isNotEmpty) {
+                          final existingIds = itemsToEdit.map((e) => e['ingredient_id'] as int).toSet();
+                          final candidate = allIngredients.firstWhere(
+                            (i) => !existingIds.contains(i['id']),
+                            orElse: () => allIngredients.first,
+                          );
                           setModalState(() {
                             itemsToEdit.add({
-                              'ingredient_id': allIngredients.first['id'] as int,
+                              'ingredient_id': candidate['id'] as int,
                               'quantity': 1.0,
-                              'unit': allIngredients.first['measurement_unit'] as String,
+                              'unit': candidate['measurement_unit'] as String,
                             });
                           });
                         }
