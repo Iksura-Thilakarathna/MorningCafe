@@ -83,6 +83,20 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
     return 1.0;
   }
 
+  bool _isPerQuantityPreferred(String name) {
+    final lower = name.toLowerCase();
+    return lower.contains('bun') || lower.contains('egg');
+  }
+
+  String _getPerQuantityPriceLabel(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('sausage bun')) return 'Price per Sausage Bun';
+    if (lower.contains('burger bun')) return 'Price per Burger Bun';
+    if (lower.contains('egg')) return 'Price per Egg';
+    if (lower.contains('bun')) return 'Price per Bun';
+    return 'Price per Unit (LKR)';
+  }
+
   void _addItemRow() {
     if (_allIngredients.isEmpty) return;
     final firstIng = _allIngredients.first;
@@ -91,6 +105,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
         'ingredient_id': firstIng['id'] as int,
         'package_quantity': 1.0,
         'package_unit': firstIng['measurement_unit'] as String,
+        'unit_price': 0.0,
         'total_cost': 0.0,
         'usable_duration_days': firstIng['default_usable_days'] ?? 3,
         'use_by_date': null,
@@ -341,51 +356,167 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                       ),
                     ],
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            key: ValueKey('qty_${idx}_$currentPkgUnit'),
-                            initialValue: it['package_quantity'].toString(),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: InputDecoration(
-                              labelText: 'Quantity',
-                              suffixText: currentPkgUnit,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            ),
-                            onChanged: (v) => setState(() => it['package_quantity'] = Formatters.parseDouble(v)),
+                    Builder(builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final ingName = ing['name'] as String;
+                      final isPerQtyItem = _isPerQuantityPreferred(ingName);
+                      final double currentQty = (it['package_quantity'] as num).toDouble();
+                      final double currentTotalCost = (it['total_cost'] as num).toDouble();
+                      final double currentUnitPrice = (it['unit_price'] as num?)?.toDouble() ??
+                          (currentQty > 0 && currentTotalCost > 0 ? (currentTotalCost / currentQty) : 0.0);
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  key: ValueKey('qty_${idx}_$currentPkgUnit'),
+                                  initialValue: it['package_quantity'].toString(),
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: InputDecoration(
+                                    labelText: 'Quantity',
+                                    suffixText: currentPkgUnit,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  ),
+                                  onChanged: (v) {
+                                    final qty = Formatters.parseDouble(v);
+                                    setState(() {
+                                      it['package_quantity'] = qty;
+                                      final up = (it['unit_price'] as num?)?.toDouble() ?? 0.0;
+                                      if (up > 0) {
+                                        it['total_cost'] = qty * up;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 4,
+                                child: TextFormField(
+                                  key: ValueKey('price_${idx}_${it['ingredient_id']}'),
+                                  initialValue: currentUnitPrice > 0
+                                      ? (currentUnitPrice % 1 == 0 ? currentUnitPrice.toInt().toString() : currentUnitPrice.toStringAsFixed(2))
+                                      : '',
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: InputDecoration(
+                                    labelText: isPerQtyItem ? _getPerQuantityPriceLabel(ingName) : 'Price per $currentPkgUnit',
+                                    prefixText: 'LKR ',
+                                    suffixText: isPerQtyItem ? 'each' : null,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  ),
+                                  onChanged: (v) {
+                                    final up = Formatters.parseDouble(v);
+                                    setState(() {
+                                      it['unit_price'] = up;
+                                      it['total_cost'] = (it['package_quantity'] as num).toDouble() * up;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  key: ValueKey('dur_${idx}_$currentPkgUnit'),
+                                  initialValue: it['usable_duration_days']?.toString() ?? '3',
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Shelf',
+                                    suffixText: 'days',
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  ),
+                                  onChanged: (v) => it['usable_duration_days'] = Formatters.parseInt(v),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            key: ValueKey('cost_${idx}_$currentPkgUnit'),
-                            initialValue: it['total_cost'].toString(),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(
-                              labelText: 'Total Cost (LKR)',
-                              prefixText: 'LKR ',
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () async {
+                              final ctrl = TextEditingController(
+                                text: currentTotalCost > 0 ? currentTotalCost.toStringAsFixed(2) : '',
+                              );
+                              final customTotal = await showDialog<double>(
+                                context: context,
+                                builder: (dlgCtx) => AlertDialog(
+                                  title: Text('Edit Total Cost ($ingName)'),
+                                  content: TextField(
+                                    controller: ctrl,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Total Cost (LKR)',
+                                      prefixText: 'LKR ',
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(dlgCtx), child: const Text('Cancel')),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(dlgCtx, Formatters.parseDouble(ctrl.text)),
+                                      child: const Text('Apply'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (customTotal != null && customTotal >= 0) {
+                                setState(() {
+                                  it['total_cost'] = customTotal;
+                                  if (currentQty > 0) {
+                                    it['unit_price'] = customTotal / currentQty;
+                                  }
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isDark ? AppColors.surfaceWarmDark : AppColors.surfaceWarm,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.calculate_outlined, size: 14, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        currentUnitPrice > 0
+                                            ? 'Auto Total (${Formatters.number(currentQty)} × ${Formatters.currency(currentUnitPrice)}):'
+                                            : 'Total Cost:',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        Formatters.currency(currentTotalCost),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(Icons.edit_outlined, size: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            onChanged: (v) => setState(() => it['total_cost'] = Formatters.parseDouble(v)),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            key: ValueKey('dur_${idx}_$currentPkgUnit'),
-                            initialValue: it['usable_duration_days']?.toString() ?? '3',
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Duration',
-                              suffixText: 'days',
-                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            ),
-                            onChanged: (v) => it['usable_duration_days'] = Formatters.parseInt(v),
-                          ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),

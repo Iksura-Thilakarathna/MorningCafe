@@ -107,8 +107,32 @@ class _OpeningStockScreenState extends State<OpeningStockScreen> {
     }
   }
 
+  bool _isPerQuantityPreferred(String name) {
+    final lower = name.toLowerCase();
+    return lower.contains('bun') || lower.contains('egg');
+  }
+
+  String _getPerQuantityPriceLabel(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('sausage bun')) return 'Price per Sausage Bun';
+    if (lower.contains('burger bun')) return 'Price per Burger Bun';
+    if (lower.contains('egg')) return 'Price per Egg';
+    if (lower.contains('bun')) return 'Price per Bun';
+    return 'Price per Unit (LKR)';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedIng = _ingredients.firstWhere(
+      (i) => i['id'] == _selectedIngredientId,
+      orElse: () => {'name': ''},
+    );
+    final ingName = selectedIng['name'] as String? ?? '';
+    final isPerQty = _isPerQuantityPreferred(ingName);
+    final qtyVal = Formatters.parseDouble(_qtyController.text);
+    final costVal = Formatters.parseDouble(_costController.text);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Record Opening Stock'),
@@ -176,17 +200,56 @@ class _OpeningStockScreenState extends State<OpeningStockScreen> {
                       labelText: 'Initial Quantity in Stock',
                       suffixText: _unit,
                     ),
+                    onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 14),
                   TextField(
                     controller: _costController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: 'Estimated Unit Cost (LKR)',
+                      labelText: isPerQty ? _getPerQuantityPriceLabel(ingName) : 'Estimated Unit Cost (LKR)',
                       prefixText: 'LKR ',
-                      suffixText: 'per $_unit',
+                      suffixText: isPerQty ? 'each' : 'per $_unit',
                     ),
+                    onChanged: (_) => setState(() {}),
                   ),
+                  if (qtyVal > 0 && costVal > 0) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.surfaceWarmDark : AppColors.surfaceWarm,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.calculate_outlined, size: 16, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Total Valuation (${Formatters.number(qtyVal)} × ${Formatters.currency(costVal)}):',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            Formatters.currency(qtyVal * costVal),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? AppColors.highlightYellow : AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   TextField(
                     controller: _daysController,

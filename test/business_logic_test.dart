@@ -171,6 +171,62 @@ void main() {
     });
 
     // -------------------------------------------------------------
+    // Test 2d: Per-quantity price purchase calculation for buns & eggs
+    // -------------------------------------------------------------
+    test('2d. Per-quantity price purchase calculation for sausage buns, eggs, and burger buns', () async {
+      final ingredients = await ingredientService.getIngredients();
+      final sausageBun = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase().contains('sausage bun'));
+      final burgerBun = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase().contains('burger bun'));
+      final egg = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase() == 'eggs');
+
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+
+      // 50 sausage buns @ 25 = 1,250
+      // 40 eggs @ 38 = 1,520
+      // 30 burger buns @ 30 = 900
+      // Total = 3,670
+      final purchaseId = await purchaseService.createPurchase(
+        referenceNo: 'TEST-PUR-BUNS-EGGS',
+        purchaseDate: today,
+        items: [
+          {
+            'ingredient_id': sausageBun['id'],
+            'package_quantity': 50.0,
+            'package_unit': 'pieces',
+            'total_cost': 50.0 * 25.0, // calculated via per-unit price
+            'usable_duration_days': 3,
+          },
+          {
+            'ingredient_id': egg['id'],
+            'package_quantity': 40.0,
+            'package_unit': 'pieces',
+            'total_cost': 40.0 * 38.0, // calculated via per-unit price
+            'usable_duration_days': 7,
+          },
+          {
+            'ingredient_id': burgerBun['id'],
+            'package_quantity': 30.0,
+            'package_unit': 'pieces',
+            'total_cost': 30.0 * 30.0, // calculated via per-unit price
+            'usable_duration_days': 3,
+          },
+        ],
+      );
+
+      final purchase = await purchaseService.getPurchaseById(purchaseId);
+      expect(purchase!['total_amount'], equals(3670.0));
+
+      final sausageBatches = await inventoryService.getStockBatches(ingredientId: sausageBun['id'] as int);
+      expect(sausageBatches.first['unit_cost'], equals(25.0));
+
+      final eggBatches = await inventoryService.getStockBatches(ingredientId: egg['id'] as int);
+      expect(eggBatches.first['unit_cost'], equals(38.0));
+
+      final burgerBatches = await inventoryService.getStockBatches(ingredientId: burgerBun['id'] as int);
+      expect(burgerBatches.first['unit_cost'], equals(30.0));
+    });
+
+    // -------------------------------------------------------------
     // Test 3: FIFO inventory costing (50@20, 30@22; consume 60 -> 1220)
     // -------------------------------------------------------------
     test('3. FIFO inventory costing: 50 @ 20, 30 @ 22; consume 60 -> cost 1,220, rem qty 20, rem val 440', () async {

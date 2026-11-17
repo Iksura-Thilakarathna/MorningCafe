@@ -25,6 +25,11 @@ class Formatters {
     return formatted;
   }
 
+  /// Formats raw number cleanly
+  static String number(num val) {
+    return _quantityFormat.format(val);
+  }
+
   /// Formats date to standard YYYY-MM-DD
   static String date(DateTime dt) {
     return _dateFormat.format(dt);

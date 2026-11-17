@@ -249,7 +249,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   Row(
                     children: [
                       Text(
-                        'Usable: ${Formatters.quantity(usable, unit)}',
+                        'Usable: ${Formatters.quantity(usable, unit)}${usable > 0 && val > 0 ? ' • ${Formatters.currency(val / usable)}/${unit == 'pieces' ? 'pc' : unit}' : ''}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -378,7 +378,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                 ],
                               ),
                               subtitle: Text(
-                                'Purchased: ${b['purchase_date']} • Unit Cost: ${Formatters.currency(cost)}\nRemaining: ${Formatters.quantity(rem, unit)} / ${Formatters.quantity(initial, unit)}',
+                                'Purchased: ${b['purchase_date']} • Price: ${Formatters.currency(cost)} / ${unit == 'pieces' ? 'piece' : unit}\nRemaining: ${Formatters.quantity(rem, unit)} / ${Formatters.quantity(initial, unit)}',
                               ),
                             );
                           },
