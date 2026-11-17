@@ -82,6 +82,11 @@ void main() {
       );
       expect(allSales.length, equals(1));
       expect(allSales[0]['total_revenue'], equals(3450.0));
+
+      // Financial statement aggregation must match exact sales revenue without join multiplication
+      final finReport = await financeService.calculate('2026-03-01', '2026-03-01');
+      expect(finReport['sales_revenue'], equals(3450.0));
+      expect(finReport['units_sold'], equals(25));
     });
 
     // -------------------------------------------------------------

@@ -35,19 +35,25 @@ class FinanceService {
     // 1. Sales Revenue & Units
     final salesRes = await db.rawQuery('''
       SELECT 
-        COALESCE(SUM(ds.total_revenue), 0.0) as total_revenue,
-        COALESCE(SUM(ds.total_cogs), 0.0) as total_cogs,
-        COALESCE(SUM(dsi.quantity_sold), 0) as units_sold,
-        COUNT(DISTINCT ds.id) as sales_days
-      FROM daily_sales ds
-      LEFT JOIN daily_sale_items dsi ON ds.id = dsi.daily_sale_id
+        COALESCE(SUM(total_revenue), 0.0) as total_revenue,
+        COALESCE(SUM(total_cogs), 0.0) as total_cogs,
+        COUNT(id) as sales_days
+      FROM daily_sales
+      WHERE sale_date >= ? AND sale_date <= ?
+    ''', [startDate, endDate]);
+
+    final unitsRes = await db.rawQuery('''
+      SELECT 
+        COALESCE(SUM(dsi.quantity_sold), 0) as units_sold
+      FROM daily_sale_items dsi
+      JOIN daily_sales ds ON dsi.daily_sale_id = ds.id
       WHERE ds.sale_date >= ? AND ds.sale_date <= ?
     ''', [startDate, endDate]);
 
     final salesRow = salesRes.first;
     final salesRevenue = (salesRow['total_revenue'] as num).toDouble();
     final cogs = (salesRow['total_cogs'] as num).toDouble();
-    final unitsSold = (salesRow['units_sold'] as num).toInt();
+    final unitsSold = (unitsRes.first['units_sold'] as num).toInt();
     final salesDays = (salesRow['sales_days'] as num).toInt();
 
     // 2. Product-wise breakdown
@@ -58,8 +64,12 @@ class FinanceService {
         COALESCE(SUM(dsi.quantity_sold), 0) as units_sold,
         COALESCE(SUM(dsi.line_total), 0.0) as revenue
       FROM products p
-      LEFT JOIN daily_sale_items dsi ON p.id = dsi.product_id
-      LEFT JOIN daily_sales ds ON dsi.daily_sale_id = ds.id AND ds.sale_date >= ? AND ds.sale_date <= ?
+      LEFT JOIN (
+        SELECT dsi.product_id, dsi.quantity_sold, dsi.line_total
+        FROM daily_sale_items dsi
+        JOIN daily_sales ds ON dsi.daily_sale_id = ds.id
+        WHERE ds.sale_date >= ? AND ds.sale_date <= ?
+      ) dsi ON p.id = dsi.product_id
       GROUP BY p.id
       ORDER BY p.id ASC
     ''', [startDate, endDate]);
