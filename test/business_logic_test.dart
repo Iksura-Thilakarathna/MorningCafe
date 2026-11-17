@@ -134,6 +134,43 @@ void main() {
     });
 
     // -------------------------------------------------------------
+    // Test 2c: Tomato purchase with unit conversion into slices
+    // -------------------------------------------------------------
+    test('2c. Tomato purchase in kg converts to slices in stock batches accurately', () async {
+      // Find Tomato Slices ingredient
+      final ingredients = await ingredientService.getIngredients();
+      final tomato = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase().contains('tomato slice'));
+      final tomatoId = tomato['id'] as int;
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+
+      // Purchase 2 kg of tomatoes for LKR 400 (conversion multiplier: 30 slices / kg)
+      final purchaseId = await purchaseService.createPurchase(
+        referenceNo: 'TEST-PUR-TOMATO-1',
+        purchaseDate: today,
+        items: [
+          {
+            'ingredient_id': tomatoId,
+            'package_quantity': 2.0,
+            'package_unit': 'kg',
+            'total_cost': 400.0,
+            'usable_duration_days': 2,
+          }
+        ],
+      );
+      expect(purchaseId, isPositive);
+
+      // Usable stock should be 2 kg * 30 slices = 60 slices
+      final usable = await inventoryService.getUsableStock(tomatoId, today);
+      expect(usable, equals(60.0));
+
+      // Batch valuation should be LKR 400.00
+      final batches = await inventoryService.getStockBatches(ingredientId: tomatoId);
+      expect(batches.length, equals(1));
+      expect(batches.first['remaining_quantity'], equals(60.0));
+      expect((batches.first['unit_cost'] as num).toDouble(), closeTo(400.0 / 60.0, 0.01));
+    });
+
+    // -------------------------------------------------------------
     // Test 3: FIFO inventory costing (50@20, 30@22; consume 60 -> 1220)
     // -------------------------------------------------------------
     test('3. FIFO inventory costing: 50 @ 20, 30 @ 22; consume 60 -> cost 1,220, rem qty 20, rem val 440', () async {

@@ -23,6 +23,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
   String _paymentStatus = 'paid';
 
   List<Map<String, dynamic>> _allIngredients = [];
+  Map<int, List<Map<String, dynamic>>> _conversions = {};
   final List<Map<String, dynamic>> _items = [];
 
   List<Map<String, dynamic>> _purchaseHistory = [];
@@ -41,9 +42,16 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
     setState(() => _isLoading = true);
     final ings = await _ingredientService.getIngredients(activeOnly: true);
     final history = await _purchaseService.getPurchases();
+    final convMap = <int, List<Map<String, dynamic>>>{};
+    for (final ing in ings) {
+      final id = ing['id'] as int;
+      convMap[id] = await _ingredientService.getConversions(id);
+    }
+
     if (mounted) {
       setState(() {
         _allIngredients = ings;
+        _conversions = convMap;
         _purchaseHistory = history;
         if (ings.isNotEmpty && _items.isEmpty) {
           _addItemRow();
@@ -51,6 +59,28 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
         _isLoading = false;
       });
     }
+  }
+
+  List<String> _getAvailableUnits(int ingredientId, String baseUnit) {
+    final list = <String>[baseUnit];
+    final convs = _conversions[ingredientId] ?? [];
+    for (final c in convs) {
+      final u = c['purchase_unit'] as String;
+      if (!list.contains(u)) {
+        list.add(u);
+      }
+    }
+    return list;
+  }
+
+  double _getConversionMultiplier(int ingredientId, String packageUnit) {
+    final convs = _conversions[ingredientId] ?? [];
+    for (final c in convs) {
+      if ((c['purchase_unit'] as String).toLowerCase() == packageUnit.toLowerCase()) {
+        return (c['multiplier'] as num).toDouble();
+      }
+    }
+    return 1.0;
   }
 
   void _addItemRow() {
@@ -229,37 +259,70 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
           ..._items.asMap().entries.map((entry) {
             final idx = entry.key;
             final it = entry.value;
+            final ingId = it['ingredient_id'] as int;
+            final ing = _allIngredients.firstWhere(
+              (i) => i['id'] == ingId,
+              orElse: () => {'name': 'Item', 'measurement_unit': 'units'},
+            );
+            final baseUnit = ing['measurement_unit'] as String;
+            final availableUnits = _getAvailableUnits(ingId, baseUnit);
+            final currentPkgUnit = it['package_unit'] as String? ?? baseUnit;
+            final multiplier = _getConversionMultiplier(ingId, currentPkgUnit);
+            final stockYield = (it['package_quantity'] as num).toDouble() * multiplier;
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Expanded(
+                          flex: 3,
                           child: DropdownButtonFormField<int>(
                             value: it['ingredient_id'] as int,
                             decoration: const InputDecoration(labelText: 'Ingredient', contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
-                            items: _allIngredients.map((ing) {
+                            items: _allIngredients.map((item) {
                               return DropdownMenuItem<int>(
-                                value: ing['id'] as int,
-                                child: Text('${ing['name']} (${ing['measurement_unit']})'),
+                                value: item['id'] as int,
+                                child: Text('${item['name']} (${item['measurement_unit']})'),
                               );
                             }).toList(),
                             onChanged: (v) {
                               if (v != null) {
-                                final ing = _allIngredients.firstWhere((i) => i['id'] == v);
+                                final selected = _allIngredients.firstWhere((i) => i['id'] == v);
                                 setState(() {
                                   it['ingredient_id'] = v;
-                                  it['package_unit'] = ing['measurement_unit'];
-                                  it['usable_duration_days'] = ing['default_usable_days'] ?? 3;
+                                  it['package_unit'] = selected['measurement_unit'];
+                                  it['usable_duration_days'] = selected['default_usable_days'] ?? 3;
                                 });
                               }
                             },
                           ),
                         ),
+                        if (availableUnits.length > 1) ...[
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 2,
+                            child: DropdownButtonFormField<String>(
+                              value: availableUnits.contains(currentPkgUnit) ? currentPkgUnit : baseUnit,
+                              decoration: const InputDecoration(labelText: 'Unit', contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+                              items: availableUnits.map((u) {
+                                return DropdownMenuItem<String>(
+                                  value: u,
+                                  child: Text(u),
+                                );
+                              }).toList(),
+                              onChanged: (v) {
+                                if (v != null) {
+                                  setState(() => it['package_unit'] = v);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
                         if (_items.length > 1)
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline, color: AppColors.danger),
@@ -267,16 +330,27 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                           ),
                       ],
                     ),
+                    if (multiplier != 1.0) ...[
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          'Yields ${Formatters.number(stockYield)} $baseUnit in stock ($multiplier $baseUnit per $currentPkgUnit)',
+                          style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
                           child: TextFormField(
+                            key: ValueKey('qty_${idx}_$currentPkgUnit'),
                             initialValue: it['package_quantity'].toString(),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             decoration: InputDecoration(
                               labelText: 'Quantity',
-                              suffixText: it['package_unit'],
+                              suffixText: currentPkgUnit,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             ),
                             onChanged: (v) => setState(() => it['package_quantity'] = Formatters.parseDouble(v)),
@@ -285,6 +359,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextFormField(
+                            key: ValueKey('cost_${idx}_$currentPkgUnit'),
                             initialValue: it['total_cost'].toString(),
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             decoration: const InputDecoration(
@@ -298,6 +373,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextFormField(
+                            key: ValueKey('dur_${idx}_$currentPkgUnit'),
                             initialValue: it['usable_duration_days']?.toString() ?? '3',
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
