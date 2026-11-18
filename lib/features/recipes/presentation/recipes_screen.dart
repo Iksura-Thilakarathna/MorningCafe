@@ -83,6 +83,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return Padding(
               padding: EdgeInsets.only(
                 left: 16,
@@ -189,7 +190,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       width: double.infinity,
                       height: 46,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                          foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                          elevation: isDark ? 2 : 0,
+                        ),
                         child: const Text('Save as New Recipe Version', style: TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () async {
                           if (itemsToEdit.isEmpty) return;
@@ -247,10 +252,17 @@ class _RecipesScreenState extends State<RecipesScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: (Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary).withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Text('Version ${ver['version_number']}', style: const TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                                child: Text(
+                                  'Version ${ver['version_number']}',
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                           ],
                         ),

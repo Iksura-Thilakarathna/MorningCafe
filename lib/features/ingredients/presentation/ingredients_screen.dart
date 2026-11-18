@@ -47,6 +47,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           return AlertDialog(
             title: Text(isEdit ? 'Edit Ingredient' : 'New Ingredient'),
             content: SingleChildScrollView(
@@ -85,9 +86,23 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                  side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
+                child: const Text('Cancel'),
+              ),
               ElevatedButton(
-                child: const Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                  foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                  elevation: isDark ? 2 : 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                ),
+                child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) return;
@@ -137,6 +152,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return Padding(
               padding: EdgeInsets.only(
                 left: 16,
@@ -186,8 +202,14 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                     const SizedBox(height: 14),
                     SizedBox(
                       width: double.infinity,
+                      height: 46,
                       child: ElevatedButton(
-                        child: const Text('Save Conversion'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                          foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                          elevation: isDark ? 2 : 0,
+                        ),
+                        child: const Text('Save Conversion', style: TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () async {
                           final pkgUnit = pkgUnitCtrl.text.trim();
                           final mult = Formatters.parseDouble(multCtrl.text);

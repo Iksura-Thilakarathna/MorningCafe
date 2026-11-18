@@ -40,65 +40,82 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(isEdit ? 'Edit Product' : 'Add New Product'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Product Name'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Selling Price (LKR)', prefixText: 'LKR '),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descCtrl,
-                decoration: const InputDecoration(labelText: 'Description (Optional)'),
-              ),
-            ],
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: Text(isEdit ? 'Edit Product' : 'Add New Product'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(labelText: 'Product Name'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: priceCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Selling Price (LKR)', prefixText: 'LKR '),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descCtrl,
+                  decoration: const InputDecoration(labelText: 'Description (Optional)'),
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            child: const Text('Save'),
-            onPressed: () async {
-              final name = nameCtrl.text.trim();
-              final price = Formatters.parseDouble(priceCtrl.text);
-              if (name.isEmpty || price < 0) return;
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                final price = Formatters.parseDouble(priceCtrl.text);
+                if (name.isEmpty || price < 0) return;
 
-              try {
-                if (isEdit) {
-                  await _productService.updateProduct(
-                    id: product['id'] as int,
-                    name: name,
-                    newPrice: price,
-                    description: descCtrl.text.trim(),
-                  );
-                } else {
-                  await _productService.createProduct(
-                    name: name,
-                    sellingPrice: price,
-                    description: descCtrl.text.trim(),
+                try {
+                  if (isEdit) {
+                    await _productService.updateProduct(
+                      id: product['id'] as int,
+                      name: name,
+                      newPrice: price,
+                      description: descCtrl.text.trim(),
+                    );
+                  } else {
+                    await _productService.createProduct(
+                      name: name,
+                      sellingPrice: price,
+                      description: descCtrl.text.trim(),
+                    );
+                  }
+                  Navigator.pop(ctx);
+                  _loadProducts();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.danger),
                   );
                 }
-                Navigator.pop(ctx);
-                _loadProducts();
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.danger),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -133,7 +150,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary,
+              foregroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.primaryDark : Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );

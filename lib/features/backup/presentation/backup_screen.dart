@@ -63,58 +63,79 @@ class _BackupScreenState extends State<BackupScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Restore Database'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'WARNING: Restoring will overwrite the current database. Make sure you have a recent backup.',
-                style: TextStyle(color: AppColors.danger, fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: jsonCtrl,
-                maxLines: 8,
-                decoration: const InputDecoration(
-                  labelText: 'Paste Backup JSON Content',
-                  hintText: 'Paste the contents of your backup JSON file here...',
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: const Text('Restore Database'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'WARNING: Restoring will overwrite the current database. Make sure you have a recent backup.',
+                  style: TextStyle(
+                    color: isDark ? AppColors.highlightRed : AppColors.danger,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: jsonCtrl,
+                  maxLines: 8,
+                  decoration: const InputDecoration(
+                    labelText: 'Paste Backup JSON Content',
+                    hintText: 'Paste the contents of your backup JSON file here...',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            child: const Text('Confirm Restore'),
-            onPressed: () async {
-              final text = jsonCtrl.text.trim();
-              if (text.isEmpty) return;
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightRed : AppColors.danger,
+                foregroundColor: Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              child: const Text('Confirm Restore', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () async {
+                final text = jsonCtrl.text.trim();
+                if (text.isEmpty) return;
 
-              try {
-                await _backupService.restoreFromBackup(text);
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Database restored successfully!'), backgroundColor: AppColors.success),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Restore failed: $e'), backgroundColor: AppColors.danger),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+                try {
+                  await _backupService.restoreFromBackup(text);
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Database restored successfully!'), backgroundColor: AppColors.success),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Restore failed: $e'), backgroundColor: AppColors.danger),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Backup & Data Safety'),
@@ -131,10 +152,10 @@ class _BackupScreenState extends State<BackupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.shield_outlined, color: AppColors.primary),
-                        SizedBox(width: 8),
-                        Text('Local Offline Storage Safety', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      children: [
+                        Icon(Icons.shield_outlined, color: isDark ? AppColors.highlightYellow : AppColors.primary),
+                        const SizedBox(width: 8),
+                        const Text('Local Offline Storage Safety', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -167,9 +188,13 @@ class _BackupScreenState extends State<BackupScreen> {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.cloud_upload_outlined),
                 label: _isProcessing
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? CircularProgressIndicator(color: isDark ? AppColors.primaryDark : Colors.white)
                     : const Text('Create Full Database Backup', style: TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                  foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                  elevation: isDark ? 2 : 0,
+                ),
                 onPressed: _isProcessing ? null : _createBackup,
               ),
             ),

@@ -123,20 +123,36 @@ class _SalesScreenState extends State<SalesScreen> {
     // Confirm dialog
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Daily Sales'),
-        content: Text(
-          'Record daily sales for $dateStr?\n\nTotal Revenue: ${Formatters.currency(totalRevenue)}\nIngredients will be deducted via FIFO.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Confirm & Save'),
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: const Text('Confirm Daily Sales'),
+          content: Text(
+            'Record daily sales for $dateStr?\n\nTotal Revenue: ${Formatters.currency(totalRevenue)}\nIngredients will be deducted via FIFO.',
           ),
-        ],
-      ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              child: const Text('Confirm & Save', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;

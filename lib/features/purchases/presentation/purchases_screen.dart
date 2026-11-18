@@ -454,10 +454,23 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
                                     ),
                                   ),
                                   actions: [
-                                    TextButton(onPressed: () => Navigator.pop(dlgCtx), child: const Text('Cancel')),
+                                    OutlinedButton(
+                                      onPressed: () => Navigator.pop(dlgCtx),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                                        side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                      ),
+                                      child: const Text('Cancel'),
+                                    ),
                                     ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                                        foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                                      ),
                                       onPressed: () => Navigator.pop(dlgCtx, Formatters.parseDouble(ctrl.text)),
-                                      child: const Text('Apply'),
+                                      child: const Text('Apply', style: TextStyle(fontWeight: FontWeight.bold)),
                                     ),
                                   ],
                                 ),
@@ -543,10 +556,13 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.highlightYellow : AppColors.primary,
+                foregroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.primaryDark : Colors.white,
+              ),
               onPressed: _isSaving ? null : _savePurchase,
               child: _isSaving
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? CircularProgressIndicator(color: Theme.of(context).brightness == Brightness.dark ? AppColors.primaryDark : Colors.white)
                   : const Text('Save & Add to Stock Batches', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
@@ -609,18 +625,34 @@ class _PurchasesScreenState extends State<PurchasesScreen> with SingleTickerProv
   void _confirmCancelPurchase(int purchaseId, String ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Cancel Purchase #$ref?'),
-        content: const Text('This will safely reverse the stock movements and reduce the corresponding inventory batches.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Yes, Cancel Purchase'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: Text('Cancel Purchase #$ref?'),
+          content: const Text('This will safely reverse the stock movements and reduce the corresponding inventory batches.'),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              child: const Text('No, Keep'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightRed : AppColors.danger,
+                foregroundColor: Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Yes, Cancel Purchase', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true) {

@@ -80,50 +80,70 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Finalize Reporting Period'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Period: ${Formatters.date(_startDate)} to ${Formatters.date(_endDate)}'),
-            const SizedBox(height: 8),
-            const Text(
-              'Finalizing archives the current profit calculation in the permanent audit ledger. Any subsequent edits will be tracked as amendments.',
-              style: TextStyle(fontSize: 12, color: AppColors.secondaryText),
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: const Text('Finalize Reporting Period'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Period: ${Formatters.date(_startDate)} to ${Formatters.date(_endDate)}',
+                style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? AppColors.textDark : AppColors.darkText),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Finalizing archives the current profit calculation in the permanent audit ledger. Any subsequent edits will be tracked as amendments.',
+                style: TextStyle(fontSize: 12, color: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: notesCtrl,
+                decoration: const InputDecoration(labelText: 'Finalization Notes (Optional)'),
+              ),
+            ],
+          ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: notesCtrl,
-              decoration: const InputDecoration(labelText: 'Finalization Notes (Optional)'),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              child: const Text('Lock & Finalize', style: TextStyle(fontWeight: FontWeight.bold)),
+              onPressed: () async {
+                await _financeService.finalizeReport(
+                  Formatters.date(_startDate),
+                  Formatters.date(_endDate),
+                  notesCtrl.text.trim(),
+                );
+                Navigator.pop(ctx);
+                _loadReport();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Period finalized and archived!'), backgroundColor: AppColors.success),
+                );
+              },
             ),
           ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Lock & Finalize'),
-            onPressed: () async {
-              await _financeService.finalizeReport(
-                Formatters.date(_startDate),
-                Formatters.date(_endDate),
-                notesCtrl.text.trim(),
-              );
-              Navigator.pop(ctx);
-              _loadReport();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Period finalized and archived!'), backgroundColor: AppColors.success),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Weekly Financial Statements'),
@@ -191,7 +211,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.lock_outline),
                         label: const Text('Finalize This Reporting Period'),
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                          foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                          elevation: isDark ? 2 : 0,
+                        ),
                         onPressed: _showFinalizeDialog,
                       ),
                     ),

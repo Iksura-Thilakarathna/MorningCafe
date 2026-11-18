@@ -68,20 +68,36 @@ class _StockReconciliationScreenState extends State<StockReconciliationScreen> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Stock Reconciliation'),
-        content: const Text(
-          'Reconciling physical stock will automatically record shortages (consumed via FIFO) or surpluses (adjustment batches) in your inventory ledger.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            child: const Text('Confirm Adjustment'),
+      builder: (ctx) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return AlertDialog(
+          title: const Text('Confirm Stock Reconciliation'),
+          content: const Text(
+            'Reconciling physical stock will automatically record shortages (consumed via FIFO) or surpluses (adjustment batches) in your inventory ledger.',
           ),
-        ],
-      ),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isDark ? AppColors.secondaryTextDark : AppColors.secondaryText,
+                side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDark ? AppColors.highlightYellow : AppColors.primary,
+                foregroundColor: isDark ? AppColors.primaryDark : Colors.white,
+                elevation: isDark ? 2 : 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              ),
+              child: const Text('Confirm Adjustment', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;

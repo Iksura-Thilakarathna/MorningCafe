@@ -180,6 +180,31 @@ class AppTheme {
         labelStyle: const TextStyle(fontSize: 12, color: AppColors.darkText),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.cardLight,
+        elevation: 6,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderLight, width: 1),
+        ),
+        titleTextStyle: const TextStyle(
+          color: AppColors.darkText,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+        contentTextStyle: const TextStyle(
+          color: AppColors.secondaryText,
+          fontSize: 14,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
     );
   }
 
@@ -287,6 +312,31 @@ class AppTheme {
         selectedColor: AppColors.highlightYellow.withValues(alpha: 0.25),
         labelStyle: const TextStyle(fontSize: 12, color: AppColors.textDark),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.cardDark,
+        elevation: 6,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderDark, width: 1.5),
+        ),
+        titleTextStyle: const TextStyle(
+          color: AppColors.textDark,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+        contentTextStyle: const TextStyle(
+          color: AppColors.secondaryTextDark,
+          fontSize: 14,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.highlightYellow,
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       ),
     );
   }
