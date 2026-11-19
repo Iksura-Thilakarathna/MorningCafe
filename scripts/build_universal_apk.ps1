@@ -9,8 +9,8 @@ Set-Location $rootDir
 Write-Host "`n[1/3] Getting Flutter dependencies..." -ForegroundColor Yellow
 flutter pub get
 
-Write-Host "`n[2/3] Building Release APK for all Android architectures (armeabi-v7a, arm64-v8a, x86_64)..." -ForegroundColor Yellow
-flutter build apk --release
+Write-Host "`n[2/3] Building Release APK for all physical Android phones (armeabi-v7a + arm64-v8a)..." -ForegroundColor Yellow
+flutter build apk --release --target-platform android-arm,android-arm64
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "`n[ERROR] Universal APK build failed!" -ForegroundColor Red

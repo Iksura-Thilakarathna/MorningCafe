@@ -11,8 +11,8 @@ echo [1/3] Running Flutter clean and getting dependencies...
 call flutter pub get
 
 echo.
-echo [2/3] Building Release APK for all Android architectures (armeabi-v7a, arm64-v8a, x86_64)...
-call flutter build apk --release
+echo [2/3] Building Release APK for all physical Android phones (armeabi-v7a + arm64-v8a)...
+call flutter build apk --release --target-platform android-arm,android-arm64
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

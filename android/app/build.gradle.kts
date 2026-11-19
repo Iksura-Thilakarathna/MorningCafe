@@ -29,8 +29,8 @@ android {
         versionName = flutter.versionName
 
         ndk {
-            // Bundle all architectures into a single universal APK for 100% device compatibility
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
+            // Bundle ARM 32-bit (budget 2GB-3GB devices) and ARM 64-bit (modern devices) for 100% physical phone compatibility
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
     }
 
@@ -47,6 +47,9 @@ android {
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes += listOf(
                 "/META-INF/{AL2.0,LGPL2.1}",

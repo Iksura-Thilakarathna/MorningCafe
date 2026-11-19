@@ -152,9 +152,9 @@ The application has been extensively optimized to prevent stuttering, memory pre
 ### Universal All-Device Compatible Release APK
 Instead of managing multiple architecture-specific APKs, Morning Cafe is packaged as a single **Universal All-Device Compatible APK** that installs seamlessly on any Android phone.
 
-| Build Variant | Architecture Support | Target Devices | Compatibility |
-| :--- | :--- | :--- | :--- |
-| **`MorningCafe_Universal.apk`** | `armeabi-v7a` + `arm64-v8a` + `x86_64` | All Android phones & tablets (Budget 2GB–3GB RAM phones, modern 64-bit devices, emulators) | **100% All Android Devices** |
+| Build Variant | Architecture Support | Size | Target Devices | Compatibility |
+| :--- | :--- | :--- | :--- | :--- |
+| **`MorningCafe_Universal.apk`** | `armeabi-v7a` + `arm64-v8a` | **20.7 MB** | All Android phones & tablets (Budget 2GB–3GB RAM phones, modern 64-bit devices) | **100% All Android Phones** |
 
 > [!NOTE]
 > When installed, Android's Package Manager automatically loads only the exact native libraries needed for your device architecture. Even on 2GB–3GB RAM budget phones, the app runs smoothly with low memory footprint thanks to R8 shrinking and SQLite WAL caching.
