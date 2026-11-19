@@ -10,7 +10,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.14.0-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android)](https://www.android.com)
-[![Tests](https://img.shields.io/badge/Tests-20%20Passed%20(100%25)-success)]()
+[![Tests](https://img.shields.io/badge/Tests-23%20Passed%20(100%25)-success)]()
 [![Offline](https://img.shields.io/badge/Offline-100%25%20Independent-brightgreen)]()
 
 ---
@@ -99,14 +99,17 @@ d:\Morning Cafe\
 
 ---
 
-## 🧪 5. Automated Test Suite (20 Tests Passed)
+## 🧪 5. Automated Test Suite (23 Tests Passed)
 
-The application includes an extensive test suite verifying all 20 business requirements specified in Section 27 of the master prompt. Tests run using an in-memory SQLite database via `sqflite_common_ffi`:
+The application includes an extensive test suite verifying all 23 business and financial integrity requirements. Tests run using an in-memory SQLite database via `sqflite_common_ffi`:
 
 | # | Test Case Description | Verified Result | Status |
 | :-: | :--- | :--- | :-: |
 | **1** | Daily sales revenue calculation for multiple products | 10 Single + 10 Double + 5 Burgers = LKR 3,450.00 | **PASSED** |
 | **2** | Double sausage bun recipe consumption | Exactly 2 sausages consumed per bun (15 buns = 30 sausages) | **PASSED** |
+| **2b** | Omelette burger tomato recipe consumption | Exactly 2 tomato slices consumed per burger | **PASSED** |
+| **2c** | Tomato purchase kg-to-slices conversion | Bulk kg converted to slices with accurate stock batch valuation | **PASSED** |
+| **2d** | Per-quantity price purchase calculation | Unit price automatically calculated for buns, eggs, and burger buns | **PASSED** |
 | **3** | FIFO inventory costing engine | 50 @ 20, 30 @ 22; consume 60 -> Cost: 1,220, Rem: 20 @ 440 | **PASSED** |
 | **4** | Weekly net profit formula | 21,900 + 500 - 8,000 - 400 - 1,500 = LKR 12,500.00 | **PASSED** |
 | **5** | Remaining stock calculation | Opening 100 + Purchase 50 - Usage 40 - Wastage 10 = 100 | **PASSED** |
@@ -146,20 +149,21 @@ The application has been extensively optimized to prevent stuttering, memory pre
 
 ## 📦 7. Installation & Deployment
 
-### Release APKs
-| Build Variant | Architecture | Size | Target Devices |
+### Universal All-Device Compatible Release APK
+Instead of managing multiple architecture-specific APKs, Morning Cafe is packaged as a single **Universal All-Device Compatible APK** that installs seamlessly on any Android phone.
+
+| Build Variant | Architecture Support | Target Devices | Compatibility |
 | :--- | :--- | :--- | :--- |
-| **`MorningCafe_budget_devices.apk`** | `armeabi-v7a` (32-bit) | **17.6 MB** | Recommended for budget 2GB–3GB RAM phones |
-| **`MorningCafe_64bit.apk`** | `arm64-v8a` (64-bit) | **19.9 MB** | Modern Android devices |
-| **`MorningCafe_v1.0.0.apk`** | Standard Release | **19.9 MB** | Standard production release |
+| **`MorningCafe_Universal.apk`** | `armeabi-v7a` + `arm64-v8a` + `x86_64` | All Android phones & tablets (Budget 2GB–3GB RAM phones, modern 64-bit devices, emulators) | **100% All Android Devices** |
 
-### Installation on Android Devices
-1. Connect your Android phone to your computer via USB (with USB Debugging enabled):
+> [!NOTE]
+> When installed, Android's Package Manager automatically loads only the exact native libraries needed for your device architecture. Even on 2GB–3GB RAM budget phones, the app runs smoothly with low memory footprint thanks to R8 shrinking and SQLite WAL caching.
+
+### Quick Installation Guide
+1. **Direct Install on Phone:**
+   Transfer `MorningCafe_Universal.apk` to your phone via USB cable, WhatsApp, Google Drive, or Bluetooth. Tap the file in your phone's File Manager and select **Install**.
+
+2. **Via ADB (Command Line):**
    ```bash
-   # For budget 2GB/3GB devices:
-   adb install -r "MorningCafe_budget_devices.apk"
-
-   # For modern 64-bit devices:
-   adb install -r "MorningCafe_64bit.apk"
+   adb install -r "MorningCafe_Universal.apk"
    ```
-2. Or transfer the `.apk` directly to your phone via USB cable, Bluetooth, or messaging, open the file in your phone's File Manager, and tap **Install**.
