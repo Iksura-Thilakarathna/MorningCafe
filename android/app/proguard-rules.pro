@@ -17,6 +17,9 @@
 -keep class dev.fluttercommunity.plus.share.** { *; }
 -keep class io.flutter.plugins.pathprovider.** { *; }
 
+# Material & Architecture Compatibility
+-keep class com.google.android.material.** { *; }
+
 # Suppress warnings
 -dontwarn io.flutter.**
 -dontwarn com.tekartik.**
