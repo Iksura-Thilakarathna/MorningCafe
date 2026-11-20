@@ -116,39 +116,44 @@ void main() {
     });
 
     // -------------------------------------------------------------
-    // Test 2b: Omelette burger recipe consumption (2 tomato slices/burger)
+    // Test 2b: Omelette burger recipe consumption (20 grams tomatoes/burger)
     // -------------------------------------------------------------
-    test('2b. Omelette burger recipe consumes 2 tomato slices per burger', () async {
+    test('2b. Omelette burger recipe consumes 20 grams of tomatoes per burger', () async {
       final recipe = await recipeService.getRecipeForProduct(3); // Omelette Burger
       expect(recipe, isNotNull);
       final version = await recipeService.getActiveRecipeVersion(recipe!['id'] as int);
       final items = await recipeService.getRecipeItems(version!['id'] as int);
 
       final tomatoItem = items.firstWhere(
-        (i) => (i['ingredient_name'] as String).toLowerCase().contains('tomato slice'),
+        (i) => (i['ingredient_name'] as String).toLowerCase().contains('tomato') &&
+               !(i['ingredient_name'] as String).toLowerCase().contains('sauce'),
       );
-      expect(tomatoItem['quantity'], equals(2.0));
-      expect(tomatoItem['unit'], equals('slices'));
+      expect(tomatoItem['quantity'], equals(20.0));
+      expect(tomatoItem['unit'], equals('grams'));
 
       // Preview consumption for 10 Omelette Burgers
       final preview = await salesService.previewRecipeRequirements({3: 10});
       final tomatoReq = preview.firstWhere(
-        (p) => (p['ingredient_name'] as String).toLowerCase().contains('tomato slice'),
+        (p) => (p['ingredient_name'] as String).toLowerCase().contains('tomato') &&
+               !(p['ingredient_name'] as String).toLowerCase().contains('sauce'),
       );
-      expect(tomatoReq['total_quantity'], equals(20.0)); // 10 burgers * 2 = 20 slices
+      expect(tomatoReq['total_quantity'], equals(200.0)); // 10 burgers * 20g = 200 grams
     });
 
     // -------------------------------------------------------------
-    // Test 2c: Tomato purchase with unit conversion into slices
+    // Test 2c: Tomato purchase with unit conversion into grams
     // -------------------------------------------------------------
-    test('2c. Tomato purchase in kg converts to slices in stock batches accurately', () async {
-      // Find Tomato Slices ingredient
+    test('2c. Tomato purchase in kg converts to grams in stock batches accurately', () async {
+      // Find Tomatoes ingredient (excluding tomato sauce)
       final ingredients = await ingredientService.getIngredients();
-      final tomato = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase().contains('tomato slice'));
+      final tomato = ingredients.firstWhere(
+        (i) => (i['name'] as String).toLowerCase().contains('tomato') &&
+               !(i['name'] as String).toLowerCase().contains('sauce'),
+      );
       final tomatoId = tomato['id'] as int;
       final today = DateTime.now().toIso8601String().substring(0, 10);
 
-      // Purchase 2 kg of tomatoes for LKR 400 (conversion multiplier: 30 slices / kg)
+      // Purchase 2 kg of tomatoes for LKR 400 (conversion multiplier: 1000 grams / kg)
       final purchaseId = await purchaseService.createPurchase(
         referenceNo: 'TEST-PUR-TOMATO-1',
         purchaseDate: today,
@@ -158,21 +163,21 @@ void main() {
             'package_quantity': 2.0,
             'package_unit': 'kg',
             'total_cost': 400.0,
-            'usable_duration_days': 2,
+            'usable_duration_days': 3,
           }
         ],
       );
       expect(purchaseId, isPositive);
 
-      // Usable stock should be 2 kg * 30 slices = 60 slices
+      // Usable stock should be 2 kg * 1000 grams = 2000 grams
       final usable = await inventoryService.getUsableStock(tomatoId, today);
-      expect(usable, equals(60.0));
+      expect(usable, equals(2000.0));
 
-      // Batch valuation should be LKR 400.00
+      // Batch valuation should be LKR 400.00 (unit cost LKR 0.20 per gram)
       final batches = await inventoryService.getStockBatches(ingredientId: tomatoId);
       expect(batches.length, equals(1));
-      expect(batches.first['remaining_quantity'], equals(60.0));
-      expect((batches.first['unit_cost'] as num).toDouble(), closeTo(400.0 / 60.0, 0.01));
+      expect(batches.first['remaining_quantity'], equals(2000.0));
+      expect((batches.first['unit_cost'] as num).toDouble(), closeTo(0.20, 0.01));
     });
 
     // -------------------------------------------------------------

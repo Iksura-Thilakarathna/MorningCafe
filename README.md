@@ -10,7 +10,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.14.0-0175C2?logo=dart)](https://dart.dev)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android)](https://www.android.com)
-[![Tests](https://img.shields.io/badge/Tests-23%20Passed%20(100%25)-success)]()
+[![Tests](https://img.shields.io/badge/Tests-25%20Passed%20(100%25)-success)]()
 [![Offline](https://img.shields.io/badge/Offline-100%25%20Independent-brightgreen)]()
 
 ---
@@ -99,17 +99,19 @@ d:\Morning Cafe\
 
 ---
 
-## 🧪 5. Automated Test Suite (23 Tests Passed)
+## 🧪 5. Automated Test Suite (25 Tests Passed)
 
-The application includes an extensive test suite verifying all 23 business and financial integrity requirements. Tests run using an in-memory SQLite database via `sqflite_common_ffi`:
+The application includes an extensive test suite verifying all 25 business and financial integrity requirements. Tests run using an in-memory SQLite database via `sqflite_common_ffi`:
 
 | # | Test Case Description | Verified Result | Status |
 | :-: | :--- | :--- | :-: |
 | **1** | Daily sales revenue calculation for multiple products | 10 Single + 10 Double + 5 Burgers = LKR 3,450.00 | **PASSED** |
 | **2** | Double sausage bun recipe consumption | Exactly 2 sausages consumed per bun (15 buns = 30 sausages) | **PASSED** |
-| **2b** | Omelette burger tomato recipe consumption | Exactly 2 tomato slices consumed per burger | **PASSED** |
-| **2c** | Tomato purchase kg-to-slices conversion | Bulk kg converted to slices with accurate stock batch valuation | **PASSED** |
+| **2b** | Omelette burger tomato recipe consumption | Exactly 20 grams of tomatoes consumed per burger | **PASSED** |
+| **2c** | Tomato purchase kg-to-grams conversion | Bulk kg converted to grams with accurate stock batch valuation | **PASSED** |
 | **2d** | Per-quantity price purchase calculation | Unit price automatically calculated for buns, eggs, and burger buns | **PASSED** |
+| **2e** | Paper serviettes bundle conversion | 1 bundle converts to 100 pieces in inventory batches | **PASSED** |
+| **2f** | Salad leaves in grams recipe consumption | Exactly 10 grams consumed per bun with 1000g/kg conversion | **PASSED** |
 | **3** | FIFO inventory costing engine | 50 @ 20, 30 @ 22; consume 60 -> Cost: 1,220, Rem: 20 @ 440 | **PASSED** |
 | **4** | Weekly net profit formula | 21,900 + 500 - 8,000 - 400 - 1,500 = LKR 12,500.00 | **PASSED** |
 | **5** | Remaining stock calculation | Opening 100 + Purchase 50 - Usage 40 - Wastage 10 = 100 | **PASSED** |
