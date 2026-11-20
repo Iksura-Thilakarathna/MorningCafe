@@ -27,6 +27,7 @@ class DatabaseHelper {
     );
     await instance._ensureTomatoSlicesConfigured(db);
     await instance._ensurePaperServiettesConfigured(db);
+    await instance._ensureSaladLeavesInGrams(db);
     setDatabaseForTesting(db);
     return db;
   }
@@ -50,6 +51,7 @@ class DatabaseHelper {
     );
     await _ensureTomatoSlicesConfigured(db);
     await _ensurePaperServiettesConfigured(db);
+    await _ensureSaladLeavesInGrams(db);
     return db;
   }
 
@@ -70,6 +72,74 @@ class DatabaseHelper {
       await _ensureTomatoSlicesConfigured(db);
     }
     await _ensurePaperServiettesConfigured(db);
+    await _ensureSaladLeavesInGrams(db);
+  }
+
+  Future<void> _ensureSaladLeavesInGrams(Database db) async {
+    try {
+      final now = DateTime.now().toIso8601String();
+      final salad = await db.query(
+        'ingredients',
+        where: 'name LIKE ?',
+        whereArgs: ['%Salad%'],
+      );
+
+      if (salad.isNotEmpty) {
+        final saladId = salad.first['id'] as int;
+        await db.update(
+          'ingredients',
+          {
+            'measurement_unit': 'grams',
+            'min_stock_level': 100.0,
+            'updated_at': now,
+          },
+          where: 'id = ?',
+          whereArgs: [saladId],
+        );
+
+        await db.update(
+          'product_recipe_items',
+          {
+            'quantity': 10.0,
+            'unit': 'grams',
+          },
+          where: 'ingredient_id = ?',
+          whereArgs: [saladId],
+        );
+
+        final existingKg = await db.query(
+          'unit_conversions',
+          where: 'ingredient_id = ? AND purchase_unit = ?',
+          whereArgs: [saladId, 'kg'],
+        );
+        if (existingKg.isEmpty) {
+          await db.insert('unit_conversions', {
+            'ingredient_id': saladId,
+            'purchase_unit': 'kg',
+            'stock_unit': 'grams',
+            'multiplier': 1000.0,
+            'created_at': now,
+          });
+        }
+
+        final existingPack = await db.query(
+          'unit_conversions',
+          where: 'ingredient_id = ? AND purchase_unit = ?',
+          whereArgs: [saladId, 'pack'],
+        );
+        if (existingPack.isEmpty) {
+          await db.insert('unit_conversions', {
+            'ingredient_id': saladId,
+            'purchase_unit': 'pack',
+            'stock_unit': 'grams',
+            'multiplier': 250.0,
+            'created_at': now,
+          });
+        }
+      }
+    } catch (_) {
+      // In case table does not exist yet during initial create
+    }
   }
 
   Future<void> _ensurePaperServiettesConfigured(Database db) async {
@@ -646,7 +716,7 @@ class DatabaseHelper {
       {'id': 4, 'name': 'Eggs', 'unit': 'pieces', 'min': 20.0, 'days': 7, 'storage': 'Egg rack, cool storage'},
       {'id': 5, 'name': 'Mayonnaise', 'unit': 'ml', 'min': 200.0, 'days': 7, 'storage': 'Refrigerate after opening'},
       {'id': 6, 'name': 'Tomato Sauce', 'unit': 'ml', 'min': 200.0, 'days': 7, 'storage': 'Refrigerate after opening'},
-      {'id': 7, 'name': 'Salad Leaves', 'unit': 'leaves', 'min': 25.0, 'days': 2, 'storage': 'Crisper drawer, chilled'},
+      {'id': 7, 'name': 'Salad Leaves', 'unit': 'grams', 'min': 100.0, 'days': 2, 'storage': 'Crisper drawer, chilled'},
       {'id': 8, 'name': 'Cooking Oil', 'unit': 'ml', 'min': 500.0, 'days': null, 'storage': 'Pantry shelf'},
       {'id': 9, 'name': 'Packaging Bags', 'unit': 'pieces', 'min': 50.0, 'days': null, 'storage': 'Packaging dry shelf'},
       {'id': 10, 'name': 'Tomato Slices', 'unit': 'slices', 'min': 20.0, 'days': 2, 'storage': 'Chilled container, refrigerated'},
@@ -689,6 +759,20 @@ class DatabaseHelper {
       'purchase_unit': 'bottle',
       'stock_unit': 'ml',
       'multiplier': 500.0,
+      'created_at': now,
+    });
+    await db.insert('unit_conversions', {
+      'ingredient_id': 7,
+      'purchase_unit': 'kg',
+      'stock_unit': 'grams',
+      'multiplier': 1000.0,
+      'created_at': now,
+    });
+    await db.insert('unit_conversions', {
+      'ingredient_id': 7,
+      'purchase_unit': 'pack',
+      'stock_unit': 'grams',
+      'multiplier': 250.0,
       'created_at': now,
     });
     await db.insert('unit_conversions', {
@@ -797,25 +881,25 @@ class DatabaseHelper {
     });
 
     // Recipe Items
-    // Single Sausage Bun: 1 sausage bun (id 1), 1 sausage (id 3), 10 ml mayo (id 5), 10 ml tomato sauce (id 6), 1 salad leaf (id 7)
+    // Single Sausage Bun: 1 sausage bun (id 1), 1 sausage (id 3), 10 ml mayo (id 5), 10 ml tomato sauce (id 6), 10 g salad leaves (id 7)
     await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 1, 'quantity': 1.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 3, 'quantity': 1.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 5, 'quantity': 10.0, 'unit': 'ml'});
     await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 6, 'quantity': 10.0, 'unit': 'ml'});
-    await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 7, 'quantity': 1.0, 'unit': 'leaves'});
+    await db.insert('product_recipe_items', {'recipe_version_id': 1, 'ingredient_id': 7, 'quantity': 10.0, 'unit': 'grams'});
 
-    // Double Sausage Bun: 1 sausage bun (id 1), 2 sausages (id 3), 10 ml mayo (id 5), 10 ml tomato sauce (id 6), 1 salad leaf (id 7)
+    // Double Sausage Bun: 1 sausage bun (id 1), 2 sausages (id 3), 10 ml mayo (id 5), 10 ml tomato sauce (id 6), 10 g salad leaves (id 7)
     await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 1, 'quantity': 1.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 3, 'quantity': 2.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 5, 'quantity': 10.0, 'unit': 'ml'});
     await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 6, 'quantity': 10.0, 'unit': 'ml'});
-    await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 7, 'quantity': 1.0, 'unit': 'leaves'});
+    await db.insert('product_recipe_items', {'recipe_version_id': 2, 'ingredient_id': 7, 'quantity': 10.0, 'unit': 'grams'});
 
-    // Omelette Burger: 1 burger bun (id 2), 1 egg (id 4), 10 ml mayo (id 5), 1 salad leaf (id 7), 2 tomato slices (id 10)
+    // Omelette Burger: 1 burger bun (id 2), 1 egg (id 4), 10 ml mayo (id 5), 10 g salad leaves (id 7), 2 tomato slices (id 10)
     await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 2, 'quantity': 1.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 4, 'quantity': 1.0, 'unit': 'pieces'});
     await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 5, 'quantity': 10.0, 'unit': 'ml'});
-    await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 7, 'quantity': 1.0, 'unit': 'leaves'});
+    await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 7, 'quantity': 10.0, 'unit': 'grams'});
     await db.insert('product_recipe_items', {'recipe_version_id': 3, 'ingredient_id': 10, 'quantity': 2.0, 'unit': 'slices'});
 
     // 5. App Settings

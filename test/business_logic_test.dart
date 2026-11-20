@@ -268,6 +268,53 @@ void main() {
     });
 
     // -------------------------------------------------------------
+    // Test 2f: Salad leaves in grams: recipe portion and kg conversion
+    // -------------------------------------------------------------
+    test('2f. Salad leaves in grams: recipe consumes 10 grams per bun, and 1 kg converts to 1000 grams in inventory', () async {
+      final recipe = await recipeService.getRecipeForProduct(1); // Single Sausage Bun
+      expect(recipe, isNotNull);
+      final version = await recipeService.getActiveRecipeVersion(recipe!['id'] as int);
+      final items = await recipeService.getRecipeItems(version!['id'] as int);
+
+      final saladItem = items.firstWhere(
+        (i) => (i['ingredient_name'] as String).toLowerCase().contains('salad'),
+      );
+      expect(saladItem['quantity'], equals(10.0));
+      expect(saladItem['unit'], equals('grams'));
+
+      // Test kg conversion in purchases
+      final ingredients = await ingredientService.getIngredients();
+      final salad = ingredients.firstWhere((i) => (i['name'] as String).toLowerCase().contains('salad'));
+      final saladId = salad['id'] as int;
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+
+      // Purchase 1.5 kg of salad leaves for LKR 600 (conversion multiplier: 1000 grams / kg)
+      final purchaseId = await purchaseService.createPurchase(
+        referenceNo: 'TEST-PUR-SALAD-1',
+        purchaseDate: today,
+        items: [
+          {
+            'ingredient_id': saladId,
+            'package_quantity': 1.5,
+            'package_unit': 'kg',
+            'total_cost': 600.0,
+            'usable_duration_days': 2,
+          }
+        ],
+      );
+      expect(purchaseId, isPositive);
+
+      // Usable stock should be 1.5 kg * 1000 grams = 1500 grams
+      final usable = await inventoryService.getUsableStock(saladId, today);
+      expect(usable, equals(1500.0));
+
+      final batches = await inventoryService.getStockBatches(ingredientId: saladId);
+      expect(batches.length, equals(1));
+      expect(batches.first['remaining_quantity'], equals(1500.0));
+      expect((batches.first['unit_cost'] as num).toDouble(), closeTo(0.40, 0.01));
+    });
+
+    // -------------------------------------------------------------
     // Test 3: FIFO inventory costing (50@20, 30@22; consume 60 -> 1220)
     // -------------------------------------------------------------
     test('3. FIFO inventory costing: 50 @ 20, 30 @ 22; consume 60 -> cost 1,220, rem qty 20, rem val 440', () async {
