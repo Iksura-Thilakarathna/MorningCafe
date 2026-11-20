@@ -25,6 +25,8 @@ class DatabaseHelper {
       onConfigure: instance._onConfigure,
       onUpgrade: instance._onUpgrade,
     );
+    await instance._ensureTomatoSlicesConfigured(db);
+    await instance._ensurePaperServiettesConfigured(db);
     setDatabaseForTesting(db);
     return db;
   }
@@ -47,6 +49,7 @@ class DatabaseHelper {
       onUpgrade: _onUpgrade,
     );
     await _ensureTomatoSlicesConfigured(db);
+    await _ensurePaperServiettesConfigured(db);
     return db;
   }
 
@@ -65,6 +68,68 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await _ensureTomatoSlicesConfigured(db);
+    }
+    await _ensurePaperServiettesConfigured(db);
+  }
+
+  Future<void> _ensurePaperServiettesConfigured(Database db) async {
+    try {
+      final now = DateTime.now().toIso8601String();
+      final existing = await db.query(
+        'ingredients',
+        where: 'name LIKE ? OR name LIKE ?',
+        whereArgs: ['%Paper Serviet%', '%Serviette%'],
+      );
+
+      int servietId;
+      if (existing.isEmpty) {
+        servietId = await db.insert('ingredients', {
+          'id': 11,
+          'name': 'Paper Serviettes',
+          'description': 'Disposable paper serviettes / napkins for food packaging (100 pcs bundle)',
+          'measurement_unit': 'pieces',
+          'min_stock_level': 100.0,
+          'default_usable_days': null,
+          'default_storage_info': 'Packaging / counter shelf',
+          'is_active': 1,
+          'notes': 'Added for packaging and inventory tracking',
+          'created_at': now,
+          'updated_at': now,
+        });
+
+        await db.insert('unit_conversions', {
+          'ingredient_id': servietId,
+          'purchase_unit': 'bundle',
+          'stock_unit': 'pieces',
+          'multiplier': 100.0,
+          'created_at': now,
+        });
+        await db.insert('unit_conversions', {
+          'ingredient_id': servietId,
+          'purchase_unit': 'pack',
+          'stock_unit': 'pieces',
+          'multiplier': 100.0,
+          'created_at': now,
+        });
+      } else {
+        servietId = existing.first['id'] as int;
+        final existingConv = await db.query(
+          'unit_conversions',
+          where: 'ingredient_id = ? AND purchase_unit = ?',
+          whereArgs: [servietId, 'bundle'],
+        );
+        if (existingConv.isEmpty) {
+          await db.insert('unit_conversions', {
+            'ingredient_id': servietId,
+            'purchase_unit': 'bundle',
+            'stock_unit': 'pieces',
+            'multiplier': 100.0,
+            'created_at': now,
+          });
+        }
+      }
+    } catch (_) {
+      // In case table does not exist yet during initial create
     }
   }
 
@@ -585,6 +650,7 @@ class DatabaseHelper {
       {'id': 8, 'name': 'Cooking Oil', 'unit': 'ml', 'min': 500.0, 'days': null, 'storage': 'Pantry shelf'},
       {'id': 9, 'name': 'Packaging Bags', 'unit': 'pieces', 'min': 50.0, 'days': null, 'storage': 'Packaging dry shelf'},
       {'id': 10, 'name': 'Tomato Slices', 'unit': 'slices', 'min': 20.0, 'days': 2, 'storage': 'Chilled container, refrigerated'},
+      {'id': 11, 'name': 'Paper Serviettes', 'unit': 'pieces', 'min': 100.0, 'days': null, 'storage': 'Packaging / counter shelf'},
     ];
 
     for (final ing in initialIngredients) {
@@ -658,6 +724,20 @@ class DatabaseHelper {
       'purchase_unit': 'pack',
       'stock_unit': 'slices',
       'multiplier': 50.0,
+      'created_at': now,
+    });
+    await db.insert('unit_conversions', {
+      'ingredient_id': 11,
+      'purchase_unit': 'bundle',
+      'stock_unit': 'pieces',
+      'multiplier': 100.0,
+      'created_at': now,
+    });
+    await db.insert('unit_conversions', {
+      'ingredient_id': 11,
+      'purchase_unit': 'pack',
+      'stock_unit': 'pieces',
+      'multiplier': 100.0,
       'created_at': now,
     });
 

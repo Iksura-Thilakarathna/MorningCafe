@@ -8,10 +8,13 @@ class AppConstants {
   // Standard Units
   static const List<String> standardUnits = [
     'pieces',
+    'pcs',
+    'bundle',
     'slices',
     'bottles',
     'packs',
     'grams',
+    'g',
     'kg',
     'ml',
     'litres',
